@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Engineering Tools</title>
+<meta name="theme-color" content="#1a4a6b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root { --bg:#f2f5f7; --card:#fff; --primary:#1a4a6b; --accent:#e07b39; --text:#1c2733; --muted:#6b7a88; --border:#d7e0e7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { background:var(--bg); color:var(--text); font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif; min-height:100%; }
+  header { background:var(--primary); color:#fff; padding:16px; padding-top:calc(16px + env(safe-area-inset-top)); box-shadow:0 2px 8px rgba(0,0,0,.15); }
+  header .hrow { display:flex; align-items:center; gap:10px; max-width:600px; margin:0 auto; }
+  header img { width:36px; height:36px; border-radius:8px; }
+  header h1 { font-size:17px; font-weight:700; }
+  header .sub { font-size:12px; opacity:.8; margin-top:3px; }
+  main { max-width:600px; margin:0 auto; padding:14px 16px 40px; }
+  .grp { font-size:13px; font-weight:700; color:var(--muted); margin:16px 4px 8px; }
+  a.app { display:flex; align-items:center; gap:14px; text-decoration:none; color:inherit; background:var(--card); border-radius:14px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(20,40,60,.08); border:1.5px solid transparent; }
+  a.app:active { background:#eef4f9; border-color:var(--border); }
+  a.app .ic { flex:0 0 46px; height:46px; border-radius:12px; background:#eef4f9; color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
+  a.app .t { font-size:15px; font-weight:700; color:var(--primary); }
+  a.app .s { font-size:12px; color:var(--muted); margin-top:4px; line-height:1.5; }
+  a.app .go { margin-left:auto; color:var(--muted); font-size:20px; }
+  .ver { text-align:center; font-size:11px; color:var(--muted); margin-top:20px; }
+</style>
+</head>
+<body>
+<header><div class="hrow"><img src="icons/icon-192.png" alt=""><div>
+  <h1>Engineering Tools</h1>
+  <div class="sub">Dr. Mahmoud El-Kateb's calculation programs</div>
+</div></div></header>
+<main>
+  <div class="grp">Programs</div>
+  <div id="apps"></div>
+  <div class="ver" id="ver"></div>
+</main>
+<script src="native-pdf.js"></script>
+<script>
+// Program registry: add one entry per program folder.
+var PROGRAMS = [
+  { href: "kateb/index.html",    icon: "RC",  title: "El-Kateb Excel Sheet",  sub: "RC design per ACI 318M-19: sections, slabs, beams, shear, punching, footings, pile caps, walls, deflection, crack width" },
+  { href: "staircase/index.html", icon: "ST", title: "Staircase Design", sub: "Staircase analysis and design: BS 8110 and ACI 318M-19 versions" },
+  { href: "ehab/index.html", icon: "EA", title: "Ehab Atallah Sheets", sub: "ACI 318M-14 / AISC 360 / ASCE 7: RC members, footings, corbels, deflection, punching (RC & PT), composite beams, PT flexure, anchorage, story drift, slab flexure" },
+  { href: "gohary/index.html", icon: "EG", title: "Elgohary StrucPro", sub: "ACI 318M-19 / ASCE 7-16: gust factor, raft rigidity, column δns and effective inertia, punching, one-way and deep shear, stirrup capacity, crack width, pile settlement" },
+  { href: "osman/index.html", icon: "OS", title: "Osman Turkey Sheets", sub: "ACI 318-11/14/19, TS500, EC2/EC3: slab on grade, beam moment resistance, punching, pile caps" }
+];
+document.getElementById("apps").innerHTML = PROGRAMS.map(function(p){
+  return "<a class='app' href='" + p.href + "'><div class='ic'>" + p.icon + "</div><div><div class='t'>" + p.title + "</div><div class='s'>" + p.sub + "</div></div><div class='go'>›</div></a>";
+}).join("");
+document.getElementById("ver").textContent = "v1.0.0 · 23 Nov 2026";
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js", {updateViaCache: "none"}).catch(function(){}); });
+}
+</script>
+</body>
+</html>

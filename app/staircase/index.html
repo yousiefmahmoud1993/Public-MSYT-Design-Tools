@@ -1,0 +1,2212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Staircase Design</title>
+<meta name="description" content="Reinforced-concrete section, footing, pile-cap, wall and deflection design per ACI 318M-19.">
+<meta name="theme-color" content="#1a4a6b">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RC Design">
+<style>html,body{margin:0;min-height:100%;background:#f2f5f7;}</style>
+</head>
+<body>
+<div id="host"></div>
+<script src="../native-pdf.js"></script>
+<script src="../xlsx.js"></script>
+<script>
+var appCss = "\n  :host {\n    --bg: #f2f5f7; --card: #ffffff; --primary: #1a4a6b; --accent: #e07b39;\n    --ok: #1e7d4f; --bad: #b33434; --text: #1c2733; --muted: #6b7a88; --border: #d7e0e7;\n  }\n  * { box-sizing: border-box; margin: 0; padding: 0; }\n  :host { font-family: -apple-system, \"Segoe UI\", Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 40px; }\n  header { background: var(--primary); color: #fff; padding: 16px; padding-top: calc(12px + env(safe-area-inset-top)); position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,.15); }\n  header h1 { font-size: 17px; font-weight: 700; }\n  header .sub { font-size: 12px; opacity: .8; margin-top: 3px; }\n  header .back { background: none; border: none; color: #fff; font-size: 14px; margin-bottom: 6px; cursor: pointer; padding: 2px 0; display: none; }\n  main { max-width: 600px; margin: 0 auto; padding: 14px; }\n  .card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(20,40,60,.08); }\n  .card h2 { font-size: 15px; color: var(--primary); margin-bottom: 12px; }\n  .grp { font-size: 13px; font-weight: 700; color: var(--muted); margin: 16px 4px 8px; }\n  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }\n  \n  .tile:active { background: #eef4f9; }\n  .tile .t { font-size: 14px; font-weight: 700; color: var(--primary); }\n  .tile .s { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }\n  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }\n  textarea { width: 100%; padding: 10px; font-size: 13px; font-family: ui-monospace, Menlo, Consolas, monospace; border: 1.5px solid var(--border); border-radius: 10px; background: #fbfdfe; color: var(--text); line-height: 1.5; }\n  input, select { width: 100%; padding: 11px 12px; font-size: 16px; border: 1.5px solid var(--border); border-radius: 10px; background: #fbfdfe; color: var(--text); }\n  input:focus, select:focus { outline: none; border-color: var(--primary); }\n  .row { display: flex; gap: 10px; }\n  .row > div { flex: 1; }\n  .go { width: 100%; margin-top: 16px; padding: 14px; font-size: 16px; font-weight: 700; background: var(--primary); color: #fff; border: none; border-radius: 12px; cursor: pointer; }\n  .go:active { background: #143a55; }\n  .result { font-size: 14px; line-height: 1.9; }\n  .result .big { font-size: 16px; font-weight: 700; color: var(--primary); background: #eef4f9; border-radius: 10px; padding: 10px 12px; margin: 8px 0; }\n  .ok { color: var(--ok); font-weight: 700; }\n  .bad { color: var(--bad); font-weight: 700; }\n  .warn { color: var(--accent); font-weight: 600; }\n  .note { font-size: 12px; color: var(--muted); line-height: 1.7; }\n  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }\n  td, th { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; }\n  th { color: var(--muted); font-weight: 600; }\n  hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }\n  .tile, .go { touch-action: manipulation; }\n  .go.print { background: var(--accent); margin-top: 10px; }\n  .hrow { display: flex; align-items: center; gap: 10px; }\n  .appicon { width: 36px; height: 36px; flex: 0 0 36px; }\n  .vsw { display: flex; align-items: center; gap: 6px; margin: 2px 0 4px; font-size: 12px; color: var(--muted); }\n  .vsw button { border: 1.5px solid var(--border); background: #fff; color: var(--muted); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }\n  .vsw button.on { border-color: var(--primary); color: var(--primary); background: #eef4f9; }\n  #homePage[data-view='large'] .grid { grid-template-columns: 1fr; }\n  #homePage[data-view='large'] \n  #homePage[data-view='large'] .tile .t { font-size: 16px; }\n  #homePage[data-view='large'] .tile .s { font-size: 12px; }\n  #homePage[data-view='list'] .grid { grid-template-columns: 1fr; gap: 6px; }\n  #homePage[data-view='list'] \n  #homePage[data-view='list'] .tile .t { font-size: 13px; white-space: nowrap; }\n  #homePage[data-view='list'] .tile .s { margin-top: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #modPage { position: relative; }\n  #printView { position: absolute; inset: 0; background: var(--bg); z-index: 50; padding: 12px; }\n  #printView .pv-bar { display: flex; flex-wrap: wrap; gap: 8px; max-width: 700px; margin: 0 auto 10px; }\n  #printView .pv-bar .go { margin-top: 0; width: auto; flex: 1 1 140px; padding: 10px 12px; font-size: 14px; }\n  #printView .sheet { background: #fff; border-radius: 12px; padding: 18px 16px; max-width: 700px; margin: 0 auto; box-shadow: 0 1px 4px rgba(20,40,60,.12); font-size: 13.5px; line-height: 1.6; }\n  #printView .sheet h1 { font-size: 17px; color: var(--primary); margin: 0 0 2px; }\n  #printView .sheet h2 { font-size: 13px; color: var(--primary); margin: 12px 0 5px; }\n  #printView .sheet .meta { font-size: 11px; color: var(--muted); margin-bottom: 10px; }\n  #printView .sheet table.inputs { width: 100%; border-collapse: collapse; font-size: 12.5px; }\n  #printView .sheet table.inputs td { border: 1px solid var(--border); padding: 4px 8px; }\n  #printView .sheet table.inputs td.k { color: var(--muted); width: 58%; }\n  #printView .eq { white-space: normal; }\n  @media print { header, #homePage, .printing > .card, .pv-bar { display: none !important; } #printView { position: static !important; padding: 0 !important; overflow: visible !important; } #printView .sheet { box-shadow: none !important; border-radius: 0 !important; max-width: none !important; padding: 0 !important; } }\n  #homePage {}\n  #modPage { display: none; }\n  .step { margin: 10px 0 2px; font-weight: 600; font-size: 13px; color: var(--text); }\n  .step-head { margin-top: 16px; font-weight: 700; font-size: 14px; color: var(--primary); border-top: 1.5px dashed var(--border); padding-top: 12px; }\n  .eq { background: #f6f9fb; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; margin: 3px 0; font-size: 14px; line-height: 2.1; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }\n  .eq.res { background: #eef4f9; font-weight: 600; }\n  .frac { display: inline-flex; flex-direction: column; text-align: center; vertical-align: middle; margin: 0 2px; line-height: 1.5; }\n  .frac .num { border-bottom: 1.4px solid currentColor; padding: 0 4px; }\n  .frac .den { padding: 0 4px; }\n  .rad { display: inline-flex; align-items: center; vertical-align: middle; border-top: 1.4px solid currentColor; padding: 3px 2px 0 2px; }  \n  \n  \\\n  .fgrp { border: 1.5px solid var(--border); border-radius: 12px; padding: 2px 12px 8px; margin: 12px 0 2px; }\n  .fgrp-t { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--primary); margin: 10px 0 2px; }\n  .fgrp label { margin-top: 8px; }\n  #modPage, #printView { padding-top: 76px; margin-top: -76px; }\n  .pv-note { font-size: 12px; color: var(--bad, #b33434); font-weight: 600; padding: 8px 4px; }\n  .pdm-row { flex: 1 1 100%; margin: 0 0 2px; }\n  #printView[data-pdm='summary'] .sheet .eq.sub { display: none; }\n  .fig { margin: 10px 0 4px; text-align: center; }\n  .fig svg { max-width: 100%; height: auto; display: inline-block; }\n  .figtop { text-align: center; padding: 4px 0 6px; border-bottom: 1.5px dashed var(--border); margin-bottom: 8px; }\n  .figtop svg { max-width: 100%; height: auto; }\n  .ver { text-align: center; font-size: 11px; color: var(--muted); margin: 20px 0 4px; }\n  .figcap { font-size: 11px; color: var(--muted); margin-top: 2px; }\n  @media print { .fig { break-inside: avoid; } }\n";
+var appBody = "\n\n<header>\n  <a href=\"../index.html\" style=\"color:#fff;opacity:.85;font-size:13px;text-decoration:none;display:inline-block;margin-bottom:6px;padding:4px 10px;border:1px solid rgba(255,255,255,.5);border-radius:8px\">‹ All programs</a>\n  <button class=\"back\" id=\"backBtn\" type=\"button\">‹ Back to list</button>\n  <div class=\"hrow\"><img class=\"appicon\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAXa0lEQVR42u2de3yU1Z3/399znmcmk2QSkhAuIiqiBGhB3Kq1gMZ6v9VWt1Otipd6aXfb2ou/16+1F3V//rS1brvd/qyr0uq22nW3uOAFsd4brCtF0AgaEEUJIEJukNtMZuY55/z+mAsJAUQzwcTmvF7zIkxmTp7n8znf+/c5R/ggIxbTLFhgcv+dOvXoKqeCOdbZWgWznHOTETcapBgQPl7DgYvjpEVE1luoV6LqxHovrF37UuueMHq/sa8gqey/FmDajFknW+Pm4dxJiEwQyUzjnMM5x8d5iAi97xfn3kXkGaXlvjWr65/eHV4DI6AXozXTZ5wD6joROVZEsNbiMldhQSQ7n/DxHi4rDQ5EiYgopXKLbxnYn7zRsPqRfZWGvYJVW1vr1dXVBVOmzJwkHj8XUecCWGutc86JiPobAPx9CXHO2SwRKvOGXeQCrl23btU7OQzfT7X0IyYWi+m6urqgZvqsL+LJSyL6XGuMsdZYQImIHgE/p5VEA8paY60xRkSfiycv1Uyf9cW6urogFovtESu9B/DVggULzOHTZvxAKXUnUGytCUTEy6qakbEHLhBR1tpAiZSKyJcqRlenn697bmksFtMNDQ3vS4DU1tbqJUuWmJppM3+qtX+9NYHJ0qxHAN5nkVCAddZaz/NPrqqqjiyte+6p2tpar7Gx0e2RgJy+OnzajB9o7V8fBOl0TrxGYP3gPCAi1ppAe/7xFVWj0y+vWF6XJcH2IyAWi+klS5aYw6fOPE9r7y5jcipnRM8P0D4oa63R2julomrM6pdXLn89q45cby9IAW769E9NDFxQjzAq69CPrPzCDIuI4NjhiTeroWHlpiz2VmVXvwAucKnblVYVzlo7An5Bh3LWWqVVReBStwMui3nG3cx4PLPO1IrHjDFmxOAOWsBgtNbaWM56c039klgspiW30qdMm/lXpdRR1lqzB/d0ZAx8GKWUttauWLdm1adzut/WfOKIWqXUUcYYOwL+oA5tjLFKqaNqPnFEbd4GWGMvFxG3L8mjkTFwgywizhp7OYBMnz69MrBegygZm0msjbidg20KREScdds8FUxXBj13BPz9Gxs455woGWvQc5V1qjaT33Yj6mf/CYEVEaxTtQqYlQvaRoDZfwFy9odZnjg3OVvEKigBSjITOsC64QuTGpx7EOcc4txkD3HVhSRASaZW1J12BBZCWggN07JNMoCUcWgFJZ4gUjAixDkH4qo9kEjBnFzJAK9FOGacx+wDNIeVK8rCMuzwd0BnyvF2u+V/thhWbDOkraPUF0zBpEEiMmXaTFeold+RchxZrfn6rDBHViu0ksydMMwkoDciAsY6VrdY7liVZPlWQ1lICqaSCkKAFmhPOr44xed7R4dRCIFzhJXQHTi6Ug47zDgQoNQXSkJCyjiUCILjFy+n+MPaVMFI8AoCfspx7mE+NxxbRHvSUezD1k7HwvUpVm4zbE867DBjQICKImFWtea8w3wOLRe603Dd0WGsgwfeSFEeGrg6GpAEKIFEAIeNUtxzSgQLFHvC4nfS/Hxlkva0QrsATwme9jDWDAvwtdIEJiCwDiMepZ7l20eGOe8wn+60I6zhqqcTvNZqKPYGJgkDzvkb57jqkyGKPCGihScb0/z4f3pIGVA9HUSLfMKepquzHV8JnjCkX74SujrbCXuaaJGP6unAOrhxWQ+PrE9T7Ata4OoZoUx30EBt50B85J4Aaio0nx6vSRlHc4/lX15OEfEEm05xzTXfZMnih1n86CKuvuoK4okEiOQ6m4bcCxHiiQRXX3UFix9dxJLFD3PNNd/EpFKU+cK/1qfY0mVJW/jUGM0nqjSJIKMJPrS0VVWPvXEgLudph/icMNHDU8KiN9M8vdlhE51cdPGF/PiH36e8vJyKilGcUHscb731NqtWrSZSVDTkWhi1UnR0dnLO587mZz+9mYqKUZSXlzN79rE0Nbfw8ooVJKSIUWE4dnzmfjd3WZZvNUQ8+dCSMGAVdGi5Qsi4ai83G7RkVtIZp5+GMYZ0Ok06ncYYwxmnnYK1dmhmPbKtlmecdkr/6z79NJCM+qxvMiSzlndSucrc70ehglxWCspCmf+nDGzvyUSNxliam5vRWmNtpmFXa01Tc/OQWfkiglIq/9JKISI0t7SgtcY5h7WZ625ubiYwFq2E7UlHMutLlIWE3qHORyIB/fN8EA6HuePO+TS3tBAOhwiFQmzatJl7//0+Skuj/W4+D4LW+ZfKAlJoNaO1RkRIBwGJRIKuri46O7to7+gA4N/unM+GDY2EQiHC4RBNTc38+t/upigcxg1Cwtgr9ITWWUqLI7z+egOnnHY2Z55+KoExLH7scZqbm4lEIvT0JHYTFDistRkVBXi+T6SoCN/3c13YHx54rTHG0NHZSRAYiosjVFVWUllZSVl5GaHs34jH42x+dwuxCy7m+OPm4GnNn5f+JXPdxRG6k6bgwUzBCVBK0dnRyZlnnMoF58dob+9Aa80pJ59EyPcx1u7WBBhjSSZ7aGlpZePGTaxZ+wYNa9aybds2IpEIRUVFGGM+8LU459i+fQdlZVFOPPEETjyhliNnHcFBB02krKwMrfuWwBOJBI0bN7Fs2V9Z+vwLpFJJkskkIiAqNPQlQERIp9NMmHAAJ5904oDmeu+9rfzpiSeZ/9t72bhxE2VlZftMgtaaeDyOiHDxRV/mK5dfwrSpNf1VZi/JEhEikQhTa6YwtWYKl106j7a27Ty6+DHm/+YeGrdsQyRc2AU7WAYulcp4EKlUCmPMB3455xg/fhyXX3YJjyx6kBNqj6ejo6Pfit3tqvI0HR0dHHzQQfzhvnu57dabmTa1Bmstxpi8SttVreXey33OGENlZQWXXnIxp516Mp2dXWQfARjaBORI6G1UdzWwe1IZuc+ICM45giBg9Ogq7r7z10ydWkM8Ht8rCJ7W7NjRzjHHHM3CB/+T2Z85liDIgJ6bP6earLX5R456v3LEKKUIgiDrlgYFdwoGlYAPQ07usafen/M8jyAIKC6OcO13vkUqld5jGKGUorOri5kzZ/C7e+ZTVVVJYAyet5P0HPA5MgDi8QQdHR309CTz6qv39QyGRzZoNmCvLqpziAgtLa388cH/RonC4fA9j/Hjx3Psp4+hqqoy/7ne+tw5x/HHzeHggyfS1NSM7/v99HcQBESjUe74f78kGi3FGIPXS2Xl5hUR6utXsfChh3l11WpaW1sJ0gGhcJiqqkpqphzO3DmzqT1+LtFoNOPdWfvxIWDr1q1cf+NNvcARlBKqq6v55b/cxmdrj8+vvBy4zjlKSkqYfOihbNr0LqFQqA8BSil27Gjn//6fG5g06RCCIMDzvH7GNp1O80833cL9f3iAnmSSUCiEl1/tjg0bNrBs2V/5/X1/4JCDDyYWO49/+OpVFBcXDwoJ3kehgjzPY3RlJarX6lRK0dzcws233Mrc2Z/pA15mBTq0FioqRmGt6SMhIkKip4cphx/GRReej7W2j7HOGVfnHN+45rs8+N+LGDOmmpKSkn4xhkg4P/fWpiZuvuVWnnnmOYqLIxQXRwpOwkdCgHOOwJg+TajWGqLRUt57byvbtjVx4IET+kjB3gJ+pRTxeJzPf/5zRCIRjDF9DHWOkF/fcRcPLlzEAQeMI5VK7xbM3mSEfJ+xY8fy2usNiAhFRZGCp1I+EgJ2T8pOAHZXuMkB2ta2Pe/F9Aa4OBLhpBNP6Gc/eueh7v7Nb6msqCCdDvZ9oQQBkUgEcCTShW8eHDJekO/7pFJpysvLGFNdnf9c71XZ2dXFW+vfJhwO59/LxBwpJkw4gJoph/d5kh3AZFf5E088xdZtTf1sxz6lVwaYChlyEmCMYceOdrSn+93k166+kkgk0kf9GGPwPI9nn32OTZs2MWrUqHxEnAv6Dpo4kUgk0k8Ccj+/uGw5WukhV4fw9vfKBygrK+Ocz52VB1hrzbhxYzn1lJM49tPH4JzLq5kc+O3t7fzzL/6VcDjcL1YwxjBu3Ng++r53BtQ5x8aNm/B9b4QAgIkTD2T+Xb/eq6vaOxDbunUbX//mt9mwoZFoaWlerez8jqWsrGyPc/X0JOno7ED9rUvArnp1d2D1jlg3b36Xx//0BP/++/vZuHEzZWXRPSbj9paeMMZgAjMkC3EfiRHu7ZfnHkvonSPKrdI333qL39//H7z11npGjSonCPbkvQjpdGqPfy8UzhRXhuJWOkPCC1JK+ngaORV04mdPoO7ZJ7n0kotpbWvrF5ztXP1Ca+v23OR9/o5zjpDvU1lVSRCYQcvpDKtURFdXF8tfWgEIoVCISYcczIQJB/QjyRiD1prbbr2FpqZmnn7mWcrLy/uoIeccnuex5b338kZ3V1WntaZmyhReeOHFIUeA2t8EADQ2buSieV/hksuv5MJ5l3HyaWfxvet+RE9PT588faaon7EVP/3JTYwePTqbDe0baIVCITY2bqSltbVfNJsbJ362tuC5/GGrgpRSRKOlREtLKSkuxlnL3fN/y/ev+3GffHzus8YYxo8bxz/+w9V0dnX2WeXOOXzfZ1tTE/X1q/Lp5p3fz3g+x82dw8wZn6S7u3ufijq7qsuPFQE51ZAvwoswYcIEHvivBSx5/Ik86L1JsNZx8YUXcPjkySR6evoFW9Y6Fj/2eOb9Pr8Dm5WSH/3w+xhj86rt/YD3vIwEtrd3DLwHcagRsKtqMsYQiRTxq9vvIJ1O91EXGamwlJSUcNml8+iOx9G6b7ItGi3liSeforFxI2qXwo5WCmstc2Z/httuvZl4PE5XV6a86Hm7r9il02la27YTmIBrv3MNZ591Bp2dncOnJPlhJKK4uJhXX13NksefyBvh3lLgnOP8L/09kydNIpHo6ZMr6h0t71pZ663KvnzBl3jg/t9xxBEz6Y7HaW1to61tO23bt9PW1kZbWxtd3d1UV1dzxeWXsvjhhXz3O9dQnm0IKLQRHzLZ0J0G1Wf+b+7hrDNP76MmcoREo1EuveRirr/xJiKRSD42MMZQXl7OwkUP8dkTjue8cz9POgjwe7muOaM+d+5s5s6dzfKXVvDyK/Vs2fIe6XSaoqIiDhg/nmlTa5g5cwZlZdH83OlgcGrCQ4oAazNqZuUr9Tzx5NOcdebpffR1TgouuCDGvb/7Pc3NLX1Kk7mq2feu+xFjx4xhzpzPEARBvr67055kEn3HHH0Uxxx91F4jaGstvu9//Izw3qTA93zunn/PzsKK621sLeVlZVxy8UV0dXX3q3zl6sdfueprLH7scTzPy0uPta5P2qJ3+8nu2mJ67QeK53kMRiCtBhPIzM3YXV5mr2U9ay2lpSW8tGIlTz/zHACpdDoPVq6adsH5X2TigRP62ILc93PtjP/4jW9x/Y030dralo+4d16XwUG/lpRdg8ZQKISIsGPHdjythgcBmfA/hNaaUMhHa4XWCt/30FpTWlryvt/3PM2dd83PguDn20g8z8PTmsrKSr7x9a+RSPTvE8pFvyUlJdz9m3s465xz+eWvbuftd97pmwbZS4OwUoqWllYWLnqYCy68hMeW/IloNPqB2yP3uw3I6fGlz/+Fb37r2qznkAMWtFa0t3fs1Z3LeEQRVr/2Opd95epMi4m1+WKgc5n8T1d3fI+g5FRHZUUFzc0t/PTWf+bu+ffwyU9+giOPmElNzRQOGD+e8lHlhEMhjDF0dnXR3NTMurfWU1//Kq+uWs2WLVuyZBYPym4a3qCs/pBP48aNrF23brcVVKUyN7T3eTLdE08/8+weVZZSipKSvUuTMQbf96msrCQIAl58cRlLlz6PiCIU8vFDoXzRJp1O51sptdZEIhFGjRqVJXMY9QXl8jPFxcV5vdo727lrumBv82RcQdnj7/d1npxBLy0t7RM/5L4vIoTDYSKRIpTa2RWXew1WDm/Q3FARoau7m0QigQDFxcX9yon7MjK7qBW2DrH33wvxeJx4PI4DIpFI9pm2YSQBmR7NbqbW1PD5c84mMIaFCx/inQ2NlJQUD1qbXyGuu7s7zqRDDua8876ApzUPP7KYtW+8kXUchkFnnBIhHk9wxMyZ/Mf99+Z7Ky+84Euc/+V5vLNhQ5+2kqEyMrXjHg6bfCj/9cB9VFePBuCSeRdy4cWX89prr6FCRUPbDRVAlCKVSvHVq68gGo2STCZJJlNUV4/m8svmkUgkhmZeXikSiQSXXzaP6urRJJMpkskk0WiUr159BalUChFV8BMqvIGAbRy0Zzq6CenM3grGOrRW+eRV76izvLxsyFWkdpWC8vKybKoiA7UxhvKyMrRSGOuoKBLC2eC7I+mwbmCEDHgpvt1us4+sCp8aozEOBMeihx7Jd7z5fiaQeviRx/KpgqGYAtFa8/Ajj6GUyl+31ppFDz2C4AgcHDlG46vMg9lvt9sBb9bxoZ+Uz9AuJIzjjEN8HHBgVPN0Y5qUhGl4/TVaWtsYM2YM723dys9u+wWPLl5CNFo6JI2wc46ioiLWrH2DzZs3M27cOFpaWvnV7XfwxwUL8CMllIfgfx8VJqQhsHDX6hRtSZcn5EPBONDdUjpTjp8dV8QpB/kY5/jz5oD/tbSHiKdIxjsJFxVhnSOZTBGNluKG+AZyooTOzi7C4RBKhGRPD0UlUbpSllvmFHHGIT6I44Uthm//OUGJP7DdUgZMQE8Ah5Qp7j01gghEvMyOKT9bkaQtpfCweCrzAEYhffrBHFpnSqCBdQROUR6yfPfvwnzuUJ942uFpuPKpBGvbLBGPj44A2Llh09mTfG6eU0RX2hHRsKXb8dD6NCu2Gdp63LDbOVFJxqn4uzGaL0z2mRhVxNOO8rDwT8t6ePDNdME2bBrwXlZaYEfK8YVDfX5wTBhfC2njCHtCInB0px3D7Xw3EaHEg4gvJAOHpwTrHLetTPLHdYUBH3AeuET26MEPPYyDUSHh4bfTrG+3fP2IEEeNzfhqES1EvGG4Z2UvcLUSXm4KuOPVFK80ZzbtK8zOiS4hU6bO3CBKDi7E3tFaIB5kruyIas3s8R6HjVKUh2TY7cvrsn7++nbLi+8FvNJksc5RUphtK3MbeDd6TmS9ksIQYBz5zYteaTIs32rwFYRy2+gOMwZS1pG24KvMXngiBdsz1ImIWGG9B9QDJ2bPRhzwzDljW+JLfuti5watr2kQbQD4Wvpsv1w4O5afqV4psXXZxV/QBI11GYmwwxB8eoGeu4dCRxvOOZTYOqUxf3HWbZPsHvaMjEHnNneAg8b8RTU0NLQ53JNKKeecMyP4DHrKwyilnMM92dDQ0KYAlFb3OueEkbPD9kuM55wTpdW9uZTayDFW+2/0P8Yqe6KbdagbsiIyAtPgqZ+sgVc3ADYWi4lasGCBicVi+s019UusNY9qz9MjtmBwdL/2PG2teTR3it6CBQvMyGGe+2fs/TDPrDiohoaVG51zVypR4jJb/o/oo8JoHpvB1F3Z0LByYywWU2RbLPLGtqGhwdXW1novr1z+esXo6rTn+adkjzEfpifADBXwXeB5vm9s8MM3166+u7a21luyZElexffxdhobGzMkrFheV1VVHdGef7yzJtcWNkLCB1U7zjnP8z1rglvXrVl9Q/bE8j72tZ+72djY6GKxmF5a99xTFVWj01rrk8mc+pOThpHx/ss+UEpppZQyNvjhujWrb8ieWN5Pre/W329oaCAWi+nn655bWlU97nUHJ2mlS521JluMH5GG3UNvcVitPc/hWkEuXbdm1V1Zj2e3NnWvQGZFJpgyZeYk8fi5iDoXwFprnXNuxD7k9bwVEVHZJijn7CIXcO26daveyWG4py+/P3ixmGbBAgNQM33GOaCuE5Fjc93DmTqCyx0KIH8DhGQP3HAORGWBzzX+LgP7kzcaVj+yK3YfnoCdcQI512najFknW+Pm4dxJiEzo3e79cY+kez/KlFl77l1EnlFa7luzuv7p3eFVCALYHaNTpx5d5VQwxzpbq2CWc24y4kZna8zy8Vv5Lo6TFhFZb6FeiaoT672wdu1LrXvC6P3G/wcJ/l22CvI9ZQAAAABJRU5ErkJggg==\" alt=\"RC\" style=\"border-radius:8px\"/><div>\n  <h1 id=\"hdrTitle\">Staircase Design</h1>\n  <div class=\"sub\" id=\"hdrSub\">Dr. Mahmoud El-Kateb's sheets as a mobile app</div>\n  </div></div>\n</header>\n\n<main>\n  <div id=\"homePage\"></div>\n  <div id=\"modPage\"></div>\n  <div class=\"ver\" id=\"verStamp\"></div>\n</main>\n\n";
+</script>
+<script>
+function mountRcApp(root) {
+  const document = root;
+
+"use strict";
+// Engineering core, ACI 318M (SI). Units: mm, MPa, N, N.mm.
+var ES = 200000;      // steel modulus, MPa
+var EPS_CU = 0.003;   // ultimate concrete strain
+
+// Whitney stress block depth factor beta1 (ACI 318M 22.2.2.4.3)
+function beta1ACI(fc) {
+  if (fc <= 28) return 0.85;
+  return Math.max(0.65, 0.85 - 0.05 * (fc - 28) / 7);
+}
+
+// Strength reduction factor phi vs net tensile strain (tied reinforcement).
+function phiACI(et, fy) {
+  var ety = fy / ES;
+  if (et <= ety) return 0.65;                 // compression-controlled (tied)
+  if (et >= ety + 0.003) return 0.90;         // tension-controlled
+  return 0.65 + (et - ety) * 0.25 / 0.003;    // transition
+}
+
+// Nominal axial force at neutral axis depth c (compression +). Layers: [{d, As}].
+function axialAt(b, h, layers, fc, fy, c) {
+  var a = Math.min(beta1ACI(fc) * c, h);
+  var n = 0.85 * fc * b * a;
+  for (var i = 0; i < layers.length; i++) {
+    var eps = EPS_CU * (c - layers[i].d) / c;
+    var fs = Math.max(-fy, Math.min(fy, ES * eps));
+    n += fs * layers[i].As;
+  }
+  return n;
+}
+
+// Nominal moment capacity (magnitude) about the gross-section centroid at c.
+function momentAt(b, h, layers, fc, fy, c) {
+  var a = Math.min(beta1ACI(fc) * c, h);
+  var m = 0.85 * fc * b * a * (h / 2 - a / 2);
+  for (var i = 0; i < layers.length; i++) {
+    var eps = EPS_CU * (c - layers[i].d) / c;
+    var fs = Math.max(-fy, Math.min(fy, ES * eps));
+    m -= fs * layers[i].As * (layers[i].d - h / 2);
+  }
+  return m;
+}
+
+// Find c for a target nominal axial force. null if out of range.
+function neutralAxisForPn(b, h, layers, fc, fy, pnTarget) {
+  var lo = 1e-4, hi = 100 * h;
+  if (pnTarget > axialAt(b, h, layers, fc, fy, hi)) return null;
+  if (pnTarget < axialAt(b, h, layers, fc, fy, lo)) return null;
+  for (var i = 0; i < 200; i++) {
+    var mid = 0.5 * (lo + hi);
+    if (axialAt(b, h, layers, fc, fy, mid) > pnTarget) hi = mid; else lo = mid;
+  }
+  return 0.5 * (lo + hi);
+}
+
+// Combined check at factored (Nu, Mu). Iterates phi (it depends on strain).
+// Returns {ok, phiMn, phi, c, et, reason}.
+function combinedCheck(b, h, layers, fc, fy, dMax, nuN, muNmm) {
+  var asTot = 0;
+  for (var i = 0; i < layers.length; i++) asTot += layers[i].As;
+  var p0 = 0.85 * fc * (b * h - asTot) + fy * asTot;
+  var phiPnMax = 0.80 * 0.65 * p0;           // tied column cap, ACI 318M 22.4.2.2
+  if (nuN > phiPnMax) return { ok: false, reason: "phiPnMax", phiPnMax: phiPnMax, p0: p0 };
+  if (nuN < -0.9 * fy * asTot) return { ok: false, reason: "tensionCap" };
+
+  var phi = 0.65, c = 0;
+  for (var it = 0; it < 60; it++) {
+    var cNew = neutralAxisForPn(b, h, layers, fc, fy, nuN / phi);
+    if (cNew === null) return { ok: false, reason: "range" };
+    c = cNew;
+    var et = EPS_CU * (dMax - c) / c;
+    var phiNew = phiACI(et, fy);
+    if (Math.abs(phiNew - phi) < 1e-4) { phi = phiNew; break; }
+    phi = phiNew;
+  }
+  var etF = EPS_CU * (dMax - c) / c;
+  var mn = momentAt(b, h, layers, fc, fy, c);
+  return { ok: phi * mn >= muNmm, phiMn: phi * mn, mn: mn, phi: phi, c: c, et: etF,
+           phiPnMax: phiPnMax, p0: p0 };
+}
+
+// Pure-bending capacity (Nu = 0). Returns {phiMn, c, et, phi}.
+function bendingCapacity(b, h, layers, fc, fy, dMax) {
+  var c = neutralAxisForPn(b, h, layers, fc, fy, 0);
+  if (c === null) return null;
+  var et = EPS_CU * (dMax - c) / c;
+  var phi = phiACI(et, fy);
+  return { phiMn: phi * momentAt(b, h, layers, fc, fy, c), c: c, et: et, phi: phi };
+}
+
+// Moment-only design (ACI 318M, phi = 0.90, tension-controlled target et = 0.005).
+// Returns {singly, asReq, asPrime, et, a, c, fsPrime, asMin, governedByMin}.
+function designMoment(b, h, d, dp, fc, fy, muNmm) {
+  var phi = 0.9;
+  var mnReq = muNmm / phi;
+  var beta1 = beta1ACI(fc);
+  var asMin = Math.max(0.25 * Math.sqrt(fc) / fy, 1.4 / fy) * b * d;
+
+  // Try singly reinforced.
+  var disc = d * d - 2 * mnReq / (0.85 * fc * b);
+  if (disc >= 0) {
+    var a = d - Math.sqrt(disc);
+    var c = a / beta1;
+    var et = EPS_CU * (d - c) / c;
+    if (et >= 0.005) {
+      var as = 0.85 * fc * a * b / fy;
+      var gov = false;
+      if (as < asMin) { as = asMin; gov = true; }
+      return { singly: true, asReq: as, asPrime: 0, et: et, a: a, c: c, asMin: asMin, governedByMin: gov };
+    }
+  }
+  // Doubly reinforced, set tension strain to 0.005 (tension-controlled limit).
+  var c2 = 0.375 * d;
+  var a2 = beta1 * c2;
+  var mn1 = 0.85 * fc * b * a2 * (d - a2 / 2);
+  var dMn = mnReq - mn1;
+  var epsSP = EPS_CU * (c2 - dp) / c2;
+  var fsPrime = Math.min(fy, ES * epsSP);
+  var asPrime = dMn / (fsPrime * (d - dp));
+  var as2 = dMn / (fy * (d - dp));
+  var as1 = 0.85 * fc * a2 * b / fy;
+  return { singly: false, asReq: as1 + as2, asPrime: asPrime, et: 0.005, a: a2, c: c2,
+           fsPrime: fsPrime, mn1: mn1, dMn: dMn, asMin: asMin, governedByMin: false };
+}
+
+// Design with axial: grow tension steel until combined check passes.
+function designWithAxial(b, h, d, dp, asStart, asPrime, fc, fy, muNmm, nuN) {
+  var as = asStart, last = null;
+  for (var i = 0; i < 300; i++) {
+    last = combinedCheck(b, h, [{d: d, As: as}, {d: dp, As: asPrime}], fc, fy, d, nuN, muNmm);
+    if (last.reason === "phiPnMax" || last.reason === "tensionCap") return { as: as, ok: false, last: last };
+    if (last.ok) return { as: as, ok: true, last: last };
+    as *= Math.max(1.01, muNmm / Math.max(last.phiMn, 1));
+  }
+  return { as: as, ok: false, last: last };
+}
+
+// Concrete elastic modulus, ACI 318M 19.2.2.1 (MPa)
+function ecACI(fc) { return 4700 * Math.sqrt(fc); }
+
+// Cracked-section neutral axis and moment of inertia (elastic, service).
+function crackedSection(b, d, dp, asT, asC, fc) {
+  var n = ES / ecACI(fc);
+  var A2 = b / 2;
+  var B2 = (n - 1) * asC + n * asT;
+  var C2 = -((n - 1) * asC * dp + n * asT * d);
+  var x = (-B2 + Math.sqrt(B2 * B2 - 4 * A2 * C2)) / (2 * A2);
+  var icr = b * Math.pow(x, 3) / 3 + (n - 1) * asC * Math.pow(x - dp, 2) + n * asT * Math.pow(d - x, 2);
+  return { x: x, icr: icr, n: n };
+}
+
+// ACI 318 10.6 crack control. Returns spacing check + optional Gergely-Lutz estimate.
+function crackControl(b, h, d, dp, nb, db, cc, asC, fc, fy, msNmm) {
+  var asT = nb * Math.PI / 4 * db * db;
+  var fs, fsSource;
+  if (msNmm > 0) {
+    var cs = crackedSection(b, d, dp, asT, asC, fc);
+    fs = cs.n * msNmm * (d - cs.x) / cs.icr;
+    fsSource = "calc";
+    var x = cs.x;
+  } else {
+    fs = 2 * fy / 3;
+    fsSource = "twoThirds";
+    x = null;
+  }
+  var sMax1 = 380 * (280 / fs) - 2.5 * cc;
+  var sMax2 = 300 * (280 / fs);
+  var sMax = Math.min(sMax1, sMax2);
+  var sActual = (nb > 1) ? (b - 2 * cc - nb * db) / (nb - 1) : Infinity;
+
+  // Gergely-Lutz estimate (NOT in current ACI 318; shown for reference only).
+  var wEst = null, beta = null, aEff = null;
+  if (x !== null) {
+    beta = (h - x) / (d - x);          // h2/h1
+    var dc = h - d;
+    aEff = 2 * dc * b / nb;            // concrete area per bar
+    wEst = 11e-6 * beta * fs * Math.cbrt(dc * aEff);  // mm
+  }
+  return { fs: fs, fsSource: fsSource, sMax: sMax, sActual: sActual,
+           pass: sActual <= sMax, wEst: wEst, beta: beta, x: x };
+}
+
+// ---------- worked-solution helpers ----------
+function fr(n, d){ return "<span class='frac'><span class='num'>" + n + "</span><span class='den'>" + d + "</span></span>"; }
+function rad(x){ return "√<span class='rad'>" + x + "</span>"; }
+function eq(h){ return "<div class='eq'>" + h + "</div>"; }
+function eqs(h){ return "<div class='eq sym'>" + h + "</div>"; }
+function eqv(h){ return "<div class='eq sub'>" + h + "</div>"; }
+function eqr(h){ return "<div class='eq res'>" + h + "</div>"; }
+function st(t){ return "<div class='step'>" + t + "</div>"; }
+function wsHead(t){ return "<div class='step-head'>Worked solution &mdash; " + t + "</div>"; }
+
+// ---------- generic UI helpers ----------
+function g(id){ var el = document.getElementById(id); return el ? el.value : ""; }
+function gn(id){ var v = parseFloat(g(id)); return isFinite(v) ? v : 0; }
+function fmt(x, dp){ if (x === null || x === undefined || !isFinite(x)) return "-"; return Number(x).toLocaleString("en-US", {maximumFractionDigits: dp === undefined ? 2 : dp}); }
+function abar(db){ return Math.PI / 4 * db * db; }
+function b1sheet(fc){ return fc <= 28 ? 0.85 : (fc >= 55 ? 0.65 : 0.85 - 0.05 * (fc - 28) / 7); }
+function rows(t){ return "<table><tr><th>Item</th><th>Value</th></tr>" + t.map(function(r){ return "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td></tr>"; }).join("") + "</table>"; }
+function big(t){ return "<div class='big'>" + t + "</div>"; }
+function okbad(cond, okT, badT){ return cond ? "<span class='ok'>✓ " + okT + "</span>" : "<span class='bad'>✗ " + badT + "</span>"; }
+function field(f){
+  var inner;
+  if (f.type === "txt") {
+    inner = "<textarea id='f_" + f.k + "' rows='" + (f.rows || 8) + "' spellcheck='false'>" + f.def + "</textarea>";
+  } else if (f.type === "sel") {
+    inner = "<select id='f_" + f.k + "'>" + f.opts.map(function(o){ return "<option value='" + o[0] + "'" + (String(o[0]) === String(f.def) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>";
+  } else {
+    inner = "<input id='f_" + f.k + "' type='number' inputmode='decimal' value='" + f.def + "'>";
+  }
+  return "<div><label>" + f.label + (f.unit ? " (" + f.unit + ")" : "") + "</label>" + inner + "</div>";
+}
+function fieldRows(fields, perRow){
+  var out = "", cur = null, buf = [];
+  function flush(){
+    if (cur === null) return;
+    var rows = "";
+    for (var i = 0; i < buf.length; i += perRow) {
+      rows += "<div class='row'>" + buf.slice(i, i + perRow).map(field).join("") + "</div>";
+    }
+    out += (cur === "" ? rows : "<div class='fgrp'><div class='fgrp-t'>" + cur + "</div>" + rows + "</div>");
+  }
+  fields.forEach(function(f){
+    var gname = f.grp || "";
+    if (gname !== cur) { flush(); cur = gname; buf = []; }
+    buf.push(f);
+  });
+  flush();
+  return out;
+}
+var MODULES = [];
+// ====== Staircase Analysis and Design (from "Staircase Analysis and Design v1.0.xlsx") ======
+// Two versions share the same analysis (exactly as the Excel sheet):
+//   BS 8110 : design block reproduced cell by cell from the sheet.
+//   ACI 318 : same analysis, flexure / min steel / shear per ACI 318M-19.
+// Units in the sheet: m, kN, kNm, mm, MPa.
+
+var STAIR_BARS = [[8,"8"],[10,"10"],[12,"12"],[14,"14"],[16,"16"],[18,"18"],[20,"20"]];
+function xlRoundUp(x, n){ var p = Math.pow(10, n || 0); var v = Math.round(Math.abs(x) * p * 1e9) / 1e9; return (x < 0 ? -1 : 1) * Math.ceil(v) / p; }
+function xlRoundDown(x, n){ var p = Math.pow(10, n || 0); var v = Math.round(Math.abs(x) * p * 1e9) / 1e9; return (x < 0 ? -1 : 1) * Math.floor(v) / p; }
+function xlInt(x){ return Math.floor(Math.round(x * 1e9) / 1e9); }
+
+function stairFields(code){
+  var bs = code === "BS";
+  return [
+    {k:"N",  grp:"Geometry", label:"Number of risers", unit:"", def:9},
+    {k:"t",  grp:"Geometry", label:"Minimum thickness of slab", unit:"m", def:0.16},
+    {k:"Y1", grp:"Geometry", label:"Y1 (flight 1 width)", unit:"m", def:1.5},
+    {k:"Y2", grp:"Geometry", label:"Y2 (gap)", unit:"m", def:0.25},
+    {k:"Y3", grp:"Geometry", label:"Y3 (flight 2 width)", unit:"m", def:1.5},
+    {k:"X1", grp:"Geometry", label:"X1 (landing 1)", unit:"m", def:1.5},
+    {k:"X2", grp:"Geometry", label:"X2 (going, plan)", unit:"m", def:2.75},
+    {k:"X3", grp:"Geometry", label:"X3 (landing 2)", unit:"m", def:1.25},
+    {k:"Ht", grp:"Geometry", label:"Top elevation", unit:"m", def:1.5},
+    {k:"Hb", grp:"Geometry", label:"Bottom elevation", unit:"m", def:0},
+    {k:"fc", grp:"Materials", label:bs ? "f'c (used as fcu)" : "f'c", unit:"MPa", def:30},
+    {k:"fy", grp:"Materials", label:"fy", unit:"MPa", def:420},
+    {k:"cc", grp:"Materials", label:bs ? "Cover cc (d = t − cc)" : "Clear cover", unit:"mm", def:20},
+    {k:"Q",  grp:"Loads", label:"Live load Q", unit:"kN/m", def:3.5},
+    {k:"Gf", grp:"Loads", label:"Dead load factor", unit:"", def:bs ? 1.4 : 1.2},
+    {k:"Qf", grp:"Loads", label:"Live load factor", unit:"", def:1.6},
+    {k:"d1", grp:"Reinforcement", label:"Bars ①②③④ dia.", unit:"mm", type:"sel", def:14, opts:STAIR_BARS},
+    {k:"d5", grp:"Reinforcement", label:"Bar ⑤ dia. (distribution)", unit:"mm", type:"sel", def:8, opts:STAIR_BARS},
+    {k:"d6", grp:"Reinforcement", label:"Bar ⑥ dia. (section B-B)", unit:"mm", type:"sel", def:12, opts:STAIR_BARS}
+  ];
+}
+
+function stairInputs(){
+  var k = ["N","t","Y1","Y2","Y3","X1","X2","X3","Ht","Hb","fc","fy","cc","Q","Gf","Qf","d1","d5","d6"], o = {};
+  k.forEach(function(n){ o[n] = gn("f_" + n); });
+  return o;
+}
+
+// Analysis, identical for both versions (sheet columns AS:AX and BQ:BS)
+function stairAnalysis(i){
+  var r = {};
+  r.H = i.Ht - i.Hb;                                           // storey height (fix: sheet used top elevation only)
+  r.run = i.X2 / i.N; r.rise = r.H / i.N;                      // M19, M20
+  r.B = Math.max(i.Y1, i.Y3);                                  // MAX(Y1,Y3)
+  r.G1 = i.Y1 * (i.t + 0.05) * 25;                             // AT5 (sheet uses Y1 only)
+  r.G2 = (i.t + i.N * r.run * r.rise) * r.B * 25 / 2;          // AT6
+  r.w1 = i.Gf * r.G1 + i.Qf * i.Q;                             // AT12
+  r.w2 = i.Gf * r.G2 + i.Qf * i.Q;                             // AT13
+  r.L1 = i.X1; r.L2 = Math.sqrt(i.X2 * i.X2 + r.H * r.H); r.L3 = i.X3; r.L = r.L1 + r.L2 + r.L3;
+  r.a1 = r.L - r.L1 / 2; r.a2 = r.L - r.L1 - r.L2 / 2; r.a3 = r.L - r.L1 - r.L2 - r.L3 / 2;
+  r.P1 = r.w1 * r.L1; r.P2 = r.w2 * r.L2; r.P3 = r.w1 * r.L3;
+  r.Ay = (r.P1 * r.a1 + r.P2 * r.a2 + r.P3 * r.a3) / r.L;      // AT20
+  r.By = (r.P1 + r.P2 + r.P3) - r.Ay;                          // AT21
+  r.V1 = -r.Ay;
+  r.V2 = r.V1 + r.w1 * r.L1;
+  r.V2p = r.V2 * i.X2 / r.L2;
+  r.V3 = r.By - r.w1 * r.L3;
+  r.V3p = r.V3 * i.X2 / r.L2;
+  r.V4 = r.By;
+  r.N1 = r.V2p * r.H / i.X2; r.N2 = r.V3p * r.H / i.X2;
+  r.x = -r.N1 * r.L2 / (-r.N1 + r.N2); r.Lx = r.L2 - r.x;
+  r.M1 = -(r.V2 + r.V1) * r.L1 / 2;
+  r.M2 = (r.V3 + r.By) * r.L3 / 2;
+  r.Mmax = r.M1 + r.V2p / 2 * (r.V2p * r.L2 / (-r.V2p + r.V3p)); // AT35
+  // Section B-B (landing spanning across Y1+Y2+Y3)
+  r.Bl = Math.max(i.X1, i.X3);
+  r.Gb = r.Bl * (i.t + 0.05) * 25 + (i.t + i.N * r.run * r.rise) * r.B * 25 / 4; // BR9
+  r.wb = i.Gf * r.Gb + i.Qf * i.Q;                                                  // BR15
+  r.Lb = i.Y1 + i.Y2 + i.Y3;
+  r.Ayb = r.wb * r.Lb / 2; r.Byb = r.Ayb;
+  r.Mb = r.wb * r.Lb * r.Lb / 8;                                                    // simply supported (fix: sheet BR25 gave wL²/4)
+  return r;
+}
+
+// Bar marks and lengths (sheet CK26:CL35, CP26), cm
+function stairLengths(i, r){
+  var cc = i.cc / 1000;
+  return {
+    L1: xlRoundUp(i.X1 * 1.25 + (i.t - 2 * cc), 2) * 100,
+    L2: xlRoundUp(i.X1 + i.X3 * 0.25 + r.L2, 2) * 100,
+    L3: xlRoundUp(i.X3 * 1.25 + (i.t - 2 * cc), 2) * 100,
+    L4: xlRoundUp(i.X3 * 1.25, 2) * 100,
+    L5: xlRoundUp(r.B + 2 * i.t - 4 * cc, 2) * 100,
+    L6: xlRoundUp(i.Y1 + i.Y2 + i.Y3 + 2 * i.t - 4 * cc, 2) * 100
+  };
+}
+
+function stairBsDesign(M, bm, i){
+  var o = {b: bm * 1000, d: i.t * 1000 - i.cc};
+  o.K = M * 1e6 / (o.b * o.d * o.d * i.fc);
+  o.Kok = o.K <= 0.156;                                        // above 0.156 compression steel is needed
+  o.z0 = 0.5 + Math.sqrt(Math.max(0, 0.25 - o.K / 0.9));
+  o.z = Math.min(o.z0, 0.95);                                  // lever arm ratio z/d, capped at 0.95
+  o.Ascalc = M * 1e6 / (0.87 * i.fy * o.z * o.d);              // fix: sheet omitted z
+  o.Asmin = 0.0013 * i.t * o.b * 1000;
+  o.As = Math.max(o.Ascalc, o.Asmin);
+  return o;
+}
+
+function stairAciDesign(M, V, bm, i, db){
+  var o = {b: bm * 1000, h: i.t * 1000};
+  o.d = o.h - i.cc - db / 2;
+  var A = 0.85 * i.fc * 0.9 * o.b / 2, Bq = -0.85 * 0.9 * i.fc * o.b * o.d, C = M * 1e6;
+  var disc = Bq * Bq - 4 * A * C;
+  o.fail = disc < 0;
+  o.a = o.fail ? NaN : (-Bq - Math.sqrt(disc)) / (2 * A);
+  o.Ascalc = 0.85 * i.fc * o.a * o.b / i.fy;
+  o.Asmin = 0.0018 * o.b * o.h;
+  o.As = Math.max(o.Ascalc, o.Asmin);
+  o.b1 = b1sheet(i.fc);
+  o.c = o.a / o.b1;
+  o.cmax = 0.375 * o.d;
+  o.tc = !o.fail && o.c <= o.cmax;
+  o.phiVc = 0.75 * 0.17 * Math.sqrt(i.fc) * o.b * o.d / 1000;
+  o.V = V; o.Vok = V <= o.phiVc;
+  o.smax = Math.min(3 * o.h, 450);
+  return o;
+}
+
+// bars across a width wm (m) for a required As: BS = sheet rule, ACI = enough bars + max spacing
+function stairBars(As, db, wm, code, smaxmm){
+  var A = Math.PI * db * db / 4, n, s;
+  if (code === "BS") {
+    n = Math.max(1, Math.ceil(As / A - 1e-9));                 // fix: round up so As,prov >= As,req
+    s = xlRoundDown(wm * 100 / n, 0);
+  } else {
+    n = Math.ceil(As / A - 1e-9);
+    s = xlRoundDown(wm * 100 / n, 0);
+    if (s * 10 > smaxmm) { s = Math.floor(smaxmm / 10); n = Math.ceil(wm * 100 / s - 1e-9); }
+  }
+  return {A: A, n: n, s: s, prov: n * A};
+}
+
+function figStair(i, r){
+  var shapes = [], W = 300, x0 = 22, sc;
+  var totX = i.X1 + i.X2 + i.X3;
+  sc = 250 / Math.max(totX, 0.1);
+  var Hm = Math.max(i.Ht - i.Hb, 0), Hpx = Math.min(Hm * sc, 110);
+  var yBot = 26 + Hpx + 10, tpx = Math.max(5, i.t * sc);
+  var xa = x0, xb = x0 + i.X1 * sc, xc = xb + i.X2 * sc, xd = xc + i.X3 * sc;
+  var yL = yBot, yH = yBot - Hpx;
+  // landing 1 (bottom) and landing 2 (top) slabs
+  shapes.push({t: "rect", x: xa, y: yL, w: xb - xa, h: tpx, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 1.3});
+  shapes.push({t: "rect", x: xc, y: yH, w: xd - xc, h: tpx, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 1.3});
+  // waist soffit
+  shapes.push({t: "line", x1: xb, y1: yL + tpx, x2: xc, y2: yH + tpx, stroke: FIG_C.pri, sw: 1.3});
+  // steps
+  var n = Math.max(1, Math.min(30, Math.round(i.N))), gx = (xc - xb) / n, ry = Hpx / n, px = xb, py = yL, k;
+  for (k = 0; k < n; k++) {
+    shapes.push({t: "line", x1: px, y1: py, x2: px, y2: py - ry, stroke: FIG_C.pri, sw: 1.3});
+    shapes.push({t: "line", x1: px, y1: py - ry, x2: px + gx, y2: py - ry, stroke: FIG_C.pri, sw: 1.3});
+    px += gx; py -= ry;
+  }
+  // supports
+  [xa + 2, xd - 2].forEach(function(sx, j){
+    var sy = (j ? yH : yL) + tpx;
+    shapes.push({t: "line", x1: sx, y1: sy, x2: sx - 6, y2: sy + 9, stroke: FIG_C.pri, sw: 1.3});
+    shapes.push({t: "line", x1: sx, y1: sy, x2: sx + 6, y2: sy + 9, stroke: FIG_C.pri, sw: 1.3});
+    shapes.push({t: "line", x1: sx - 8, y1: sy + 9, x2: sx + 8, y2: sy + 9, stroke: FIG_C.pri, sw: 1.3});
+  });
+  var yD = yL + tpx + 24;
+  shapes = shapes.concat(dimShapes(xa, yD, xb, yD, "X1 = " + fmt(i.X1, 2) + " m"));
+  shapes = shapes.concat(dimShapes(xb, yD, xc, yD, "X2 = " + fmt(i.X2, 2) + " m"));
+  shapes = shapes.concat(dimShapes(xc, yD, xd, yD, "X3 = " + fmt(i.X3, 2) + " m"));
+  shapes = shapes.concat(dimShapes(xd + 8, yH, xd + 8, yL, "H = " + fmt(Hm, 2) + " m", -4));
+  shapes.push({t: "text", x: (xb + xc) / 2 - 22, y: (yL + yH) / 2 - 14, s: i.N + " risers × R = " + fmt(r.rise * 1000, 0) + " mm", size: 8.5, fill: FIG_C.mut, anchor: "end"});
+  shapes.push({t: "text", x: (xb + xc) / 2 - 22, y: (yL + yH) / 2 - 3, s: "G = " + fmt(r.run * 1000, 0) + " mm", size: 8.5, fill: FIG_C.mut, anchor: "end"});
+  shapes.push({t: "text", x: W / 2, y: 14, s: "Section A-A (t = " + fmt(i.t * 1000, 0) + " mm)", size: 10.5, fill: FIG_C.pri, bold: true});
+  return {w: W, h: yD + 22, shapes: shapes};
+}
+// text with a leader line to the point it describes
+function lead(sh, px, py, tx, ty, s, c, anchor){
+  sh.push({t: "line", x1: px, y1: py, x2: tx + (anchor === "end" ? 2 : anchor === "start" ? -2 : 0), y2: ty - 3, stroke: c, sw: 0.6});
+  sh.push({t: "circle", x: px, y: py, r: 1.2, fill: c, stroke: c, sw: 0.5});
+  sh.push({t: "text", x: tx, y: ty, s: s, size: 8.5, fill: c, bold: true, anchor: anchor || "middle"});
+}
+
+// ---------- more drawings ----------
+function figStairPlan(i, r){
+  var shapes = [], W = 300, x0 = 84, y0 = 26;
+  var LX = i.X1 + i.X2 + i.X3, LY = i.Y1 + i.Y2 + i.Y3;
+  var sc = Math.min(190 / Math.max(LX, 0.1), 130 / Math.max(LY, 0.1));
+  var xa = x0, xb = xa + i.X1 * sc, xc = xb + i.X2 * sc, xd = xc + i.X3 * sc;
+  var ya = y0, yb = ya + i.Y1 * sc, yc = yb + i.Y2 * sc, yd = yc + i.Y3 * sc;
+  shapes.push({t: "rect", x: xa, y: ya, w: xd - xa, h: yd - ya, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 1.3});
+  // flights with treads
+  [[ya, yb], [yc, yd]].forEach(function(f){
+    var n = Math.max(1, Math.min(30, Math.round(i.N))), k;
+    for (k = 1; k < n; k++) shapes.push({t: "line", x1: xb + (xc - xb) * k / n, y1: f[0], x2: xb + (xc - xb) * k / n, y2: f[1], stroke: FIG_C.mut, sw: 0.7});
+    shapes.push({t: "line", x1: xb, y1: f[0], x2: xb, y2: f[1], stroke: FIG_C.pri, sw: 1});
+    shapes.push({t: "line", x1: xc, y1: f[0], x2: xc, y2: f[1], stroke: FIG_C.pri, sw: 1});
+  });
+  if (i.Y2 > 0) shapes.push({t: "rect", x: xb, y: yb, w: xc - xb, h: yc - yb, fill: FIG_C.white, stroke: FIG_C.pri, sw: 1});
+  // walking direction: flight 1 up towards the upper landing, flight 2 continues back
+  [[(ya + yb) / 2 + (yb - ya) * 0.22, 1], [(yc + yd) / 2, -1]].forEach(function(f){
+    var y = f[0], x1 = f[1] > 0 ? xb + 6 : xc - 6, x2 = f[1] > 0 ? xc - 6 : xb + 6;
+    shapes.push({t: "line", x1: x1, y1: y, x2: x2, y2: y, stroke: FIG_C.pri, sw: 1});
+    shapes.push({t: "line", x1: x2, y1: y, x2: x2 - 5 * f[1], y2: y - 3, stroke: FIG_C.pri, sw: 1});
+    shapes.push({t: "line", x1: x2, y1: y, x2: x2 - 5 * f[1], y2: y + 3, stroke: FIG_C.pri, sw: 1});
+    shapes.push({t: "circle", x: x1, y: y, r: 1.8, fill: FIG_C.pri, stroke: FIG_C.pri});
+    shapes.push({t: "text", x: x2 + 4 * f[1] * 0 + (f[1] > 0 ? 3 : -15), y: y + 3, s: "UP", size: 8, fill: FIG_C.pri, bold: true, anchor: "start"});
+  });
+  shapes.push({t: "text", x: (xa + xb) / 2, y: (ya + yd) / 2 + 3, s: "Landing", size: 8.5, fill: FIG_C.mut});
+  shapes.push({t: "text", x: xc + (xd - xc) * 0.39, y: (ya + yd) / 2 + 3, s: "Landing", size: 8, fill: FIG_C.mut});
+  // cut lines
+  var yA = (ya + yb) / 2;
+  shapes.push({t: "line", x1: xa - 8, y1: yA, x2: xd + 8, y2: yA, stroke: FIG_C.acc, sw: 1.2, dash: "6 3"});
+  shapes.push({t: "text", x: xa - 10, y: yA + 4, s: "A", size: 10, fill: FIG_C.acc, bold: true, anchor: "end"});
+  shapes.push({t: "text", x: xd + 10, y: yA + 4, s: "A", size: 10, fill: FIG_C.acc, bold: true, anchor: "start"});
+  var xB = xc + (xd - xc) * 0.78;
+  shapes.push({t: "line", x1: xB, y1: ya - 8, x2: xB, y2: yd + 8, stroke: FIG_C.acc, sw: 1.2, dash: "6 3"});
+  shapes.push({t: "text", x: xB, y: ya - 11, s: "B", size: 10, fill: FIG_C.acc, bold: true});
+  shapes.push({t: "text", x: xB, y: yd + 18, s: "B", size: 10, fill: FIG_C.acc, bold: true});
+  var yD = yd + 30;
+  shapes = shapes.concat(dimShapes(xa, yD, xb, yD, "X1 = " + fmt(i.X1, 2) + " m"));
+  shapes = shapes.concat(dimShapes(xb, yD, xc, yD, "X2 = " + fmt(i.X2, 2) + " m"));
+  shapes = shapes.concat(dimShapes(xc, yD, xd, yD, "X3 = " + fmt(i.X3, 2) + " m"));
+  var xY = xa - 22;
+  shapes = shapes.concat(dimShapes(xY, ya, xY, yb, "Y1 = " + fmt(i.Y1, 2), -5));
+  if (i.Y2 > 0) shapes.push({t: "text", x: xY - 5, y: (yb + yc) / 2 + 3, s: "Y2 = " + fmt(i.Y2, 2), size: 9, fill: FIG_C.mut, anchor: "end"});
+  shapes = shapes.concat(dimShapes(xY, yc, xY, yd, "Y3 = " + fmt(i.Y3, 2), -5));
+  shapes.push({t: "line", x1: xY - 3, y1: yb, x2: xY + 3, y2: yb, stroke: FIG_C.mut});
+  shapes.push({t: "text", x: W / 2, y: 12, s: "Plan (dimensions in m)", size: 10.5, fill: FIG_C.pri, bold: true});
+  return {w: W, h: yD + 20, shapes: shapes};
+}
+function arrowDown(shapes, x, yTop, yTip, c){
+  shapes.push({t: "line", x1: x, y1: yTop, x2: x, y2: yTip, stroke: c, sw: 1});
+  shapes.push({t: "line", x1: x - 2.5, y1: yTip - 4, x2: x, y2: yTip, stroke: c, sw: 1});
+  shapes.push({t: "line", x1: x + 2.5, y1: yTip - 4, x2: x, y2: yTip, stroke: c, sw: 1});
+}
+function arrowUp(shapes, x, yBot, yTip, c){
+  shapes.push({t: "line", x1: x, y1: yBot, x2: x, y2: yTip, stroke: c, sw: 1.4});
+  shapes.push({t: "line", x1: x - 3, y1: yTip + 5, x2: x, y2: yTip, stroke: c, sw: 1.4});
+  shapes.push({t: "line", x1: x + 3, y1: yTip + 5, x2: x, y2: yTip, stroke: c, sw: 1.4});
+}
+// simply supported beam with segment loads: segs = [{L, w, label}], reactions RA, RB
+function figBeamLoads(segs, RA, RB, title, lenLabel){
+  var shapes = [], W = 300, x0 = 30, Lpx = 240, yB = 78;
+  var L = segs.reduce(function(a, s){ return a + s.L; }, 0), wmax = Math.max.apply(null, segs.map(function(s){ return s.w; }));
+  var x = x0;
+  segs.forEach(function(s){
+    var wpx = s.L / L * Lpx, h = 10 + 26 * s.w / Math.max(wmax, 1e-9), top = yB - 4 - h, k, n = Math.max(2, Math.round(wpx / 14));
+    shapes.push({t: "rect", x: x, y: top, w: wpx, h: h, fill: [0.99, 0.93, 0.88], stroke: FIG_C.acc, sw: 0.8});
+    for (k = 0; k <= n; k++) arrowDown(shapes, x + 3 + (wpx - 6) * k / n, top, yB - 4, FIG_C.acc);
+    shapes.push({t: "text", x: x + wpx / 2, y: top - 5, s: s.label + " = " + fmt(s.w, 2) + " kN/m", size: 8, fill: FIG_C.acc});
+    if (segs.length > 1) shapes = shapes.concat(dimShapes(x, yB + 40, x + wpx, yB + 40, s.dim || fmt(s.L, 3) + " m"));
+    x += wpx;
+  });
+  shapes.push({t: "line", x1: x0, y1: yB, x2: x0 + Lpx, y2: yB, stroke: FIG_C.pri, sw: 3});
+  [x0, x0 + Lpx].forEach(function(sx, j){
+    shapes.push({t: "line", x1: sx, y1: yB, x2: sx - 6, y2: yB + 9, stroke: FIG_C.pri, sw: 1.2});
+    shapes.push({t: "line", x1: sx, y1: yB, x2: sx + 6, y2: yB + 9, stroke: FIG_C.pri, sw: 1.2});
+    arrowUp(shapes, sx, yB + 26, yB + 11, FIG_C.ok);
+    shapes.push({t: "text", x: sx + (j ? -6 : 6), y: yB + 27, s: (j ? "By = " : "Ay = ") + fmt(j ? RB : RA, 2) + " kN", size: 8.5, fill: FIG_C.ok, anchor: j ? "end" : "start"});
+  });
+  var yL = yB + (segs.length > 1 ? 62 : 44);
+  shapes = shapes.concat(dimShapes(x0, yL, x0 + Lpx, yL, lenLabel));
+  shapes.push({t: "text", x: W / 2, y: 12, s: title, size: 10.5, fill: FIG_C.pri, bold: true});
+  return {w: W, h: yL + 20, shapes: shapes};
+}
+// diagram from sample points [[s, v], ...]; positive values drawn below the axis (moment) or above (shear)
+function figDiagram(pts, L, title, unit, labels, down, opt){
+  opt = opt || {};
+  var shapes = [], W = 300, x0 = 30, Lpx = 240, y0 = 76, A = 40;
+  var vmax = Math.max.apply(null, pts.map(function(p){ return Math.abs(p[1]); })) || 1;
+  var X = function(s){ return x0 + s / L * Lpx; }, Y = function(v){ return y0 + (down ? 1 : -1) * v / vmax * A; };
+  shapes.push({t: "line", x1: x0, y1: y0, x2: x0 + Lpx, y2: y0, stroke: FIG_C.mut, sw: 1});
+  // hatch: vertical ordinates every ~8 px
+  for (var q = 1; q < pts.length; q++) {
+    var xa = X(pts[q - 1][0]), xb = X(pts[q][0]), m = Math.floor((xb - xa) / 8);
+    for (var j = 1; j < m; j++) {
+      var t = j / m, v = pts[q - 1][1] + (pts[q][1] - pts[q - 1][1]) * t;
+      shapes.push({t: "line", x1: xa + (xb - xa) * t, y1: y0, x2: xa + (xb - xa) * t, y2: Y(v), stroke: FIG_C.pri, sw: 0.35});
+    }
+  }
+  for (var k = 1; k < pts.length; k++)
+    shapes.push({t: "line", x1: X(pts[k - 1][0]), y1: Y(pts[k - 1][1]), x2: X(pts[k][0]), y2: Y(pts[k][1]), stroke: FIG_C.pri, sw: 1.5});
+  labels.forEach(function(lb){
+    var below = (down ? 1 : -1) * lb[1] >= 0, an = lb[3] || "middle";
+    var dx = an === "start" ? 3 : an === "end" ? -3 : 0;
+    shapes.push({t: "text", x: X(lb[0]) + dx, y: Y(lb[1]) + (below ? 12 : -5), s: lb[2], size: 8.5, fill: FIG_C.txt, anchor: an, bold: !!lb[4]});
+  });
+  var yDim = y0 + A + 18;
+  (opt.marks || []).forEach(function(mk){
+    shapes.push({t: "line", x1: X(mk[0]), y1: y0 - A - 4, x2: X(mk[0]), y2: y0, stroke: FIG_C.acc, sw: 0.8, dash: "3 2"});
+    shapes.push({t: "text", x: X(mk[0]) + 3, y: y0 - A - 2, s: mk[1], size: 8, fill: FIG_C.acc, anchor: "start"});
+  });
+  if (opt.segs) {
+    var s0 = 0;
+    opt.segs.forEach(function(sg){ shapes = shapes.concat(dimShapes(X(s0), yDim, X(s0 + sg), yDim, fmt(sg, 3) + " m")); s0 += sg; });
+    yDim += 16;
+  }
+  shapes.push({t: "text", x: W / 2, y: 12, s: title + " (" + unit + ")", size: 10.5, fill: FIG_C.pri, bold: true});
+  return {w: W, h: yDim + 10, shapes: shapes};
+}
+function parab3(p0, p1, p2, n){ // quadratic through 3 points, sampled
+  var out = [], k, s, a = p0[0], b = p1[0], c = p2[0];
+  for (k = 0; k <= n; k++) {
+    s = a + (c - a) * k / n;
+    out.push([s, p0[1] * (s - b) * (s - c) / ((a - b) * (a - c)) + p1[1] * (s - a) * (s - c) / ((b - a) * (b - c)) + p2[1] * (s - a) * (s - b) / ((c - a) * (c - b))]);
+  }
+  return out;
+}
+function stairMoments(r){
+  var pts = [], k, s, n = 12;
+  for (k = 0; k <= n; k++) { s = r.L1 * k / n; pts.push([s, r.Ay * s - r.w1 * s * s / 2]); }
+  var xm = Math.min(Math.max(r.x, 0.02 * r.L2), 0.98 * r.L2);
+  pts = pts.concat(parab3([r.L1, r.M1], [r.L1 + xm, r.Mmax], [r.L1 + r.L2, r.M2], 16).slice(1));
+  for (k = 1; k <= n; k++) { s = r.L3 * (1 - k / n); pts.push([r.L - s, r.By * s - r.w1 * s * s / 2]); }
+  return pts;
+}
+function figStairReinf(i, r, b1, b5, b6){
+  // only the steel this tool designs: main bottom bars (Mmax) ② and ④, distribution ⑤, landing B-B ⑥
+  var f = figStair(i, r), c = FIG_C.acc, dy = 30;
+  var sh = f.shapes.filter(function(s){ return !(s.t === "text" && (/^Section A-A/.test(s.s) || / risers|^G = /.test(s.s))); });
+  sh.forEach(function(s){ if (s.y != null) s.y += dy; if (s.y1 != null) { s.y1 += dy; s.y2 += dy; } });
+  var x0 = 22, sc = 250 / Math.max(i.X1 + i.X2 + i.X3, 0.1);
+  var Hm = Math.max(i.Ht - i.Hb, 0), Hpx = Math.min(Hm * sc, 110), yL = 26 + Hpx + 10 + dy, yH = yL - Hpx, tpx = Math.max(5, i.t * sc);
+  var xa = x0, xb = xa + i.X1 * sc, xc = xb + i.X2 * sc, xd = xc + i.X3 * sc, o = 2.2;
+  var slope = (yL - yH) / Math.max(xc - xb, 1e-9);
+  var Ls = function(x1, y1, x2, y2){ sh.push({t: "line", x1: x1, y1: y1, x2: x2, y2: y2, stroke: c, sw: 1.8}); };
+  var yb1 = yL + tpx - o, yb2 = yH + tpx - o;
+  // ② bottom of lower landing + waist, 0.25 X3 into the upper landing
+  Ls(xa + 3, yb1, xb, yb1); Ls(xb, yb1, xc, yb2); Ls(xc, yb2, xc + 0.25 * (xd - xc), yb2);
+  // ④ bottom of upper landing, extended 0.25 X3 into the waist (crosses ② at the corner)
+  var e4 = 0.25 * (xd - xc), y4 = yb2 - 2.2;
+  Ls(xd - 3, y4, xc, y4); Ls(xc, y4, xc - e4, y4 + e4 * slope);
+  // ⑤ distribution bars (dots) along the waist
+  for (var k = 1; k < 8; k++) { var xx = xb + (xc - xb) * k / 8; sh.push({t: "circle", x: xx, y: yb1 - (xx - xb) * slope - 2.6, r: 1.4, fill: c, stroke: c}); }
+  var main = b1.n + "T" + i.d1 + "/" + b1.s + " cm";
+  var xm = xb + (xc - xb) * 0.62;
+  lead(sh, xm, yb1 - (xm - xb) * slope, xm + 30, yb1 - (xm - xb) * slope + 26, "② " + main, c, "start");
+  lead(sh, (xc + xd) / 2 + 8, y4, (xc + xd) / 2 + 8, yH - 18, "④ " + main, c, "middle");
+  var x5 = xb + (xc - xb) * 3 / 8;
+  lead(sh, x5, yb1 - (x5 - xb) * slope - 2.6, x5 - 34, yb1 - (x5 - xb) * slope - 30, "⑤ T" + i.d5 + "/" + b5.s + " cm", c, "end");
+  sh.push({t: "text", x: 150, y: 14, s: "Reinforcement - section A-A", size: 10.5, fill: FIG_C.pri, bold: true});
+  var yN = f.h + dy + 4;
+  sh.push({t: "text", x: 150, y: yN, s: "⑥ landing B-B (bottom, across the stair): " + b6.n + "T" + i.d6 + "/" + b6.s + " cm", size: 9, fill: c, bold: true});
+  return {w: f.w, h: yN + 10, shapes: sh};
+}
+
+// ---------- report ----------
+function S(x){ return "<sub>" + x + "</sub>"; }
+function E3(sym, subst, res){ return eqs(sym) + (subst ? eqv(subst) : "") + eqr(res); }
+function stairRun(code){
+  var i = stairInputs();
+  if (!(i.N > 0 && i.X2 > 0 && i.t > 0 && i.fc > 0 && i.fy > 0 && i.Ht > i.Hb)) return "<span class='bad'>Enter positive values for risers, X2, thickness, f'c and fy, and top elevation above bottom.</span>";
+  var r = stairAnalysis(i), Lg = stairLengths(i, r), bs = code === "BS";
+  var out = "", ws = "";
+  var dA, dB, b1, b5, b6, ok = true;
+  if (bs) {
+    dA = stairBsDesign(r.Mmax, r.B, i); dB = stairBsDesign(r.Mb, r.Bl, i);
+    b1 = stairBars(dA.As, i.d1, r.B, "BS"); b6 = stairBars(dB.As, i.d6, r.Bl, "BS");
+    var dist = dA.As / 5, A5 = Math.PI * i.d5 * i.d5 / 4, n5 = Math.max(1, Math.ceil(dist / A5 - 1e-9));
+    b5 = {A: A5, n: n5, s: xlRoundDown(100 / n5, 0), cnt: Math.ceil(n5 * r.L2 - 1e-9), As: dist};
+    ok = dA.Kok && dB.Kok;
+  } else {
+    dA = stairAciDesign(r.Mmax, Math.max(Math.abs(r.Ay), Math.abs(r.By)), r.B, i, i.d1);
+    dB = stairAciDesign(r.Mb, r.Ayb, r.Bl, i, i.d6);
+    b1 = stairBars(dA.As, i.d1, r.B, "ACI", dA.smax); b6 = stairBars(dB.As, i.d6, r.Bl, "ACI", dB.smax);
+    var A5a = Math.PI * i.d5 * i.d5 / 4, As5 = 0.0018 * 1000 * i.t * 1000, n5a = Math.ceil(As5 / A5a - 1e-9);
+    var s5max = Math.min(5 * i.t * 1000, 450), s5 = Math.min(xlRoundDown(100 / n5a, 0), Math.floor(s5max / 10));
+    b5 = {A: A5a, n: Math.ceil(100 / s5 - 1e-9), s: s5, As: As5, n0: n5a, smax: s5max};
+    b5.cnt = Math.ceil(r.L2 * 100 / s5 - 1e-9);
+    ok = !dA.fail && !dB.fail && dA.tc && dB.tc && dA.Vok && dB.Vok;
+  }
+  var mk = function(b, d, L){ return b.n + "T" + d + "/" + b.s + " cm,  L = " + fmt(L, 0) + " cm"; };
+  var schedule = [
+    ["① top, landing 1", mk(b1, i.d1, Lg.L1)], ["② bottom, landing 1 + flight", mk(b1, i.d1, Lg.L2)],
+    ["③ top, landing 2", mk(b1, i.d1, Lg.L3)], ["④ bottom, landing 2", mk(b1, i.d1, Lg.L4)],
+    ["⑤ distribution", b5.cnt + "T" + i.d5 + "/" + b5.s + " cm,  L = " + fmt(Lg.L5, 0) + " cm"],
+    ["⑥ section B-B", mk(b6, i.d6, Lg.L6)]
+  ];
+  var schedHtml = "<table><tr><th>Bar</th><th>Arrangement</th></tr>" + schedule.map(function(s){ return "<tr><td>" + s[0] + "</td><td>" + s[1] + "</td></tr>"; }).join("") + "</table>";
+
+  // ----- results card (summary) -----
+  out += figHtml(figStair(i, r), "Longitudinal section A-A (supports at landing ends)");
+  out += rows([["M" + S("max") + " A-A", fmt(r.Mmax, 2) + " kN.m"], ["M" + S("max") + " B-B", fmt(r.Mb, 2) + " kN.m"],
+               ["A" + S("s") + " A-A", fmt(dA.As, 0) + " mm²"], ["A" + S("s") + " B-B", fmt(dB.As, 0) + " mm²"]]);
+  out += schedHtml;
+  out += big(ok ? "<span class='ok'>✓ All checks Ok</span>" : "<span class='bad'>✗ Some checks fail — see below</span>");
+
+  // ----- worked solution (details) -----
+  ws += wsHead("staircase " + (bs ? "(BS 8110)" : "(ACI 318M-19)"));
+  ws += figHtml(figStairPlan(i, r), "Plan: flights Y1, Y3, gap Y2; landings X1, X3; cuts A-A and B-B");
+
+  ws += "<div class='step-head'>1. Geometry</div>";
+  ws += E3("H = Top elevation − Bottom elevation", "H = " + fmt(i.Ht, 3) + " − " + fmt(i.Hb, 3), "H = " + fmt(r.H, 3) + " m");
+  ws += E3("Run = " + fr("X" + S("2"), "N"), "Run = " + fr(fmt(i.X2, 3), fmt(i.N, 0)), "Run = " + fmt(r.run, 4) + " m");
+  ws += E3("Rise = " + fr("H", "N"), "Rise = " + fr(fmt(r.H, 3), fmt(i.N, 0)), "Rise = " + fmt(r.rise, 4) + " m");
+  ws += E3("L" + S("2") + " = " + rad("X" + S("2") + "² + H²"), "L" + S("2") + " = " + rad(fmt(i.X2, 3) + "² + " + fmt(r.H, 3) + "²"), "L" + S("2") + " = " + fmt(r.L2, 3) + " m");
+  ws += E3("L = L" + S("1") + " + L" + S("2") + " + L" + S("3") + "  (L" + S("1") + " = X" + S("1") + ", L" + S("3") + " = X" + S("3") + ")",
+           "L = " + fmt(r.L1, 3) + " + " + fmt(r.L2, 3) + " + " + fmt(r.L3, 3), "L = " + fmt(r.L, 3) + " m");
+  ws += E3("B = max(Y" + S("1") + ", Y" + S("3") + ")", "B = max(" + fmt(i.Y1, 3) + ", " + fmt(i.Y3, 3) + ")", "B = " + fmt(r.B, 3) + " m");
+
+  ws += "<div class='step-head'>2. Loads on section A-A</div>";
+  ws += st("Landing (slab + 0.05 m finishes, γ = 25 kN/m³):");
+  ws += E3("G" + S("1") + " = Y" + S("1") + " × (t + 0.05) × γ" + S("c"), "G" + S("1") + " = " + fmt(i.Y1, 3) + " × (" + fmt(i.t, 3) + " + 0.05) × 25", "G" + S("1") + " = " + fmt(r.G1, 3) + " kN/m");
+  ws += st("Flight (waist + steps):");
+  ws += E3("G" + S("2") + " = " + fr("(t + N × Run × Rise) × B × γ" + S("c"), "2"),
+           "G" + S("2") + " = " + fr("(" + fmt(i.t, 3) + " + " + fmt(i.N, 0) + " × " + fmt(r.run, 4) + " × " + fmt(r.rise, 4) + ") × " + fmt(r.B, 3) + " × 25", "2"),
+           "G" + S("2") + " = " + fmt(r.G2, 3) + " kN/m");
+  ws += E3("w" + S("1") + " = γ" + S("G") + " G" + S("1") + " + γ" + S("Q") + " Q", "w" + S("1") + " = " + fmt(i.Gf, 2) + " × " + fmt(r.G1, 3) + " + " + fmt(i.Qf, 2) + " × " + fmt(i.Q, 2), "w" + S("1") + " = " + fmt(r.w1, 3) + " kN/m");
+  ws += E3("w" + S("2") + " = γ" + S("G") + " G" + S("2") + " + γ" + S("Q") + " Q", "w" + S("2") + " = " + fmt(i.Gf, 2) + " × " + fmt(r.G2, 3) + " + " + fmt(i.Qf, 2) + " × " + fmt(i.Q, 2), "w" + S("2") + " = " + fmt(r.w2, 3) + " kN/m");
+
+  ws += "<div class='step-head'>3. Analysis A-A (simply supported, developed length)</div>";
+  ws += figHtml(figBeamLoads([{L: r.L1, w: r.w1, label: "w1"}, {L: r.L2, w: r.w2, label: "w2", dim: "L2 = " + fmt(r.L2, 3) + " m (inclined)"}, {L: r.L3, w: r.w1, label: "w1"}], r.Ay, r.By, "Loading A-A", "L = " + fmt(r.L, 3) + " m (developed length)"), "Factored loads along the developed length");
+  ws += E3("P" + S("1") + " = w" + S("1") + " L" + S("1"), "P" + S("1") + " = " + fmt(r.w1, 3) + " × " + fmt(r.L1, 3), "P" + S("1") + " = " + fmt(r.P1, 3) + " kN");
+  ws += E3("P" + S("2") + " = w" + S("2") + " L" + S("2"), "P" + S("2") + " = " + fmt(r.w2, 3) + " × " + fmt(r.L2, 3), "P" + S("2") + " = " + fmt(r.P2, 3) + " kN");
+  ws += E3("P" + S("3") + " = w" + S("1") + " L" + S("3"), "P" + S("3") + " = " + fmt(r.w1, 3) + " × " + fmt(r.L3, 3), "P" + S("3") + " = " + fmt(r.P3, 3) + " kN");
+  ws += st("Lever arms of P" + S("1") + ", P" + S("2") + ", P" + S("3") + " about support B:");
+  ws += E3("a" + S("1") + " = L − " + fr("L" + S("1"), "2"), "a" + S("1") + " = " + fmt(r.L, 3) + " − " + fr(fmt(r.L1, 3), "2"), "a" + S("1") + " = " + fmt(r.a1, 3) + " m");
+  ws += E3("a" + S("2") + " = L − L" + S("1") + " − " + fr("L" + S("2"), "2"), "a" + S("2") + " = " + fmt(r.L, 3) + " − " + fmt(r.L1, 3) + " − " + fr(fmt(r.L2, 3), "2"), "a" + S("2") + " = " + fmt(r.a2, 3) + " m");
+  ws += E3("a" + S("3") + " = " + fr("L" + S("3"), "2"), "a" + S("3") + " = " + fr(fmt(r.L3, 3), "2"), "a" + S("3") + " = " + fmt(r.a3, 3) + " m");
+  ws += E3("A" + S("y") + " = " + fr("P" + S("1") + " a" + S("1") + " + P" + S("2") + " a" + S("2") + " + P" + S("3") + " a" + S("3"), "L"),
+           "A" + S("y") + " = " + fr(fmt(r.P1, 3) + " × " + fmt(r.a1, 3) + " + " + fmt(r.P2, 3) + " × " + fmt(r.a2, 3) + " + " + fmt(r.P3, 3) + " × " + fmt(r.a3, 3), fmt(r.L, 3)),
+           "A" + S("y") + " = " + fmt(r.Ay, 3) + " kN");
+  ws += E3("B" + S("y") + " = P" + S("1") + " + P" + S("2") + " + P" + S("3") + " − A" + S("y"), "B" + S("y") + " = " + fmt(r.P1, 3) + " + " + fmt(r.P2, 3) + " + " + fmt(r.P3, 3) + " − " + fmt(r.Ay, 3), "B" + S("y") + " = " + fmt(r.By, 3) + " kN");
+  ws += st("Shear forces (V′ = component normal to the flight):");
+  ws += E3("V" + S("1") + " = −A" + S("y"), "", "V" + S("1") + " = " + fmt(r.V1, 3) + " kN");
+  ws += E3("V" + S("2") + " = V" + S("1") + " + w" + S("1") + " L" + S("1"), "V" + S("2") + " = " + fmt(r.V1, 3) + " + " + fmt(r.w1, 3) + " × " + fmt(r.L1, 3), "V" + S("2") + " = " + fmt(r.V2, 3) + " kN");
+  ws += E3("V" + S("2") + "′ = V" + S("2") + " × " + fr("X" + S("2"), "L" + S("2")), "V" + S("2") + "′ = " + fmt(r.V2, 3) + " × " + fr(fmt(i.X2, 3), fmt(r.L2, 3)), "V" + S("2") + "′ = " + fmt(r.V2p, 3) + " kN");
+  ws += E3("V" + S("3") + " = B" + S("y") + " − w" + S("1") + " L" + S("3"), "V" + S("3") + " = " + fmt(r.By, 3) + " − " + fmt(r.w1, 3) + " × " + fmt(r.L3, 3), "V" + S("3") + " = " + fmt(r.V3, 3) + " kN");
+  ws += E3("V" + S("3") + "′ = V" + S("3") + " × " + fr("X" + S("2"), "L" + S("2")), "V" + S("3") + "′ = " + fmt(r.V3, 3) + " × " + fr(fmt(i.X2, 3), fmt(r.L2, 3)), "V" + S("3") + "′ = " + fmt(r.V3p, 3) + " kN");
+  ws += E3("V" + S("4") + " = B" + S("y"), "", "V" + S("4") + " = " + fmt(r.V4, 3) + " kN");
+  ws += st("Axial forces in the flight:");
+  ws += E3("N" + S("1") + " = V" + S("2") + "′ × " + fr("H", "X" + S("2")), "N" + S("1") + " = " + fmt(r.V2p, 3) + " × " + fr(fmt(r.H, 3), fmt(i.X2, 3)), "N" + S("1") + " = " + fmt(r.N1, 3) + " kN");
+  ws += E3("N" + S("2") + " = V" + S("3") + "′ × " + fr("H", "X" + S("2")), "N" + S("2") + " = " + fmt(r.V3p, 3) + " × " + fr(fmt(r.H, 3), fmt(i.X2, 3)), "N" + S("2") + " = " + fmt(r.N2, 3) + " kN");
+  // drawn with the usual sign (+ at the left support), i.e. the sheet's V values reversed
+  ws += figHtml(figDiagram([[0, -r.V1], [r.L1, -r.V2], [r.L1, -r.V2p], [r.L1 + r.L2, -r.V3p], [r.L1 + r.L2, -r.V3], [r.L, -r.V4]], r.L, "Shear force diagram A-A", "kN",
+    [[0, -r.V1, fmt(-r.V1, 1), "start"], [r.L1, -r.V2p, fmt(-r.V2p, 1), "start"], [r.L1 + r.L2, -r.V3p, fmt(-r.V3p, 1), "end"], [r.L, -r.V4, fmt(-r.V4, 1), "end"]], false,
+    {marks: [[r.L1 + r.x, "V = 0 at x = " + fmt(r.x, 3) + " m"]], segs: [r.L1, r.L2, r.L3]}), "SFD (V′ on the flight; + = upward shear at the left)");
+  ws += st("Point of zero shear on the flight:");
+  ws += E3("x = " + fr("−N" + S("1") + " × L" + S("2"), "N" + S("2") + " − N" + S("1")), "x = " + fr("−(" + fmt(r.N1, 3) + ") × " + fmt(r.L2, 3), fmt(r.N2, 3) + " − (" + fmt(r.N1, 3) + ")"), "x = " + fmt(r.x, 3) + " m  (from the start of the flight)");
+  ws += st("Moments (area of the shear diagram):");
+  ws += E3("M" + S("1") + " = " + fr("−(V" + S("1") + " + V" + S("2") + ") × L" + S("1"), "2"), "M" + S("1") + " = " + fr("−(" + fmt(r.V1, 3) + " + " + fmt(r.V2, 3) + ") × " + fmt(r.L1, 3), "2"), "M" + S("1") + " = " + fmt(r.M1, 3) + " kN.m");
+  ws += E3("M" + S("2") + " = " + fr("(V" + S("3") + " + V" + S("4") + ") × L" + S("3"), "2"), "M" + S("2") + " = " + fr("(" + fmt(r.V3, 3) + " + " + fmt(r.V4, 3) + ") × " + fmt(r.L3, 3), "2"), "M" + S("2") + " = " + fmt(r.M2, 3) + " kN.m");
+  ws += E3("M" + S("max") + " = M" + S("1") + " + " + fr("V" + S("2") + "′", "2") + " × " + fr("V" + S("2") + "′ × L" + S("2"), "V" + S("3") + "′ − V" + S("2") + "′"),
+           "M" + S("max") + " = " + fmt(r.M1, 3) + " + " + fr(fmt(r.V2p, 3), "2") + " × " + fr(fmt(r.V2p, 3) + " × " + fmt(r.L2, 3), fmt(r.V3p, 3) + " − (" + fmt(r.V2p, 3) + ")"),
+           "M" + S("max") + " = " + fmt(r.Mmax, 3) + " kN.m");
+  ws += figHtml(figDiagram(stairMoments(r), r.L, "Bending moment diagram A-A", "kN.m",
+    [[r.L1, r.M1, fmt(r.M1, 1), "end"], [r.L1 + r.x, r.Mmax, "Mmax = " + fmt(r.Mmax, 1), "middle", 1], [r.L1 + r.L2, r.M2, fmt(r.M2, 1), "start"]], true,
+    {marks: [[r.L1 + r.x, "Mmax at x = " + fmt(r.x, 3) + " m"]], segs: [r.L1, r.L2, r.L3]}), "BMD (sagging drawn below the axis)");
+
+  ws += "<div class='step-head'>4. Analysis B-B (landing spanning across the stair)</div>";
+  ws += E3("B" + S("L") + " = max(X" + S("1") + ", X" + S("3") + ")", "B" + S("L") + " = max(" + fmt(i.X1, 3) + ", " + fmt(i.X3, 3) + ")", "B" + S("L") + " = " + fmt(r.Bl, 3) + " m");
+  ws += E3("G = B" + S("L") + " (t + 0.05) γ" + S("c") + " + " + fr("(t + N × Run × Rise) × B × γ" + S("c"), "4"),
+           "G = " + fmt(r.Bl, 3) + " × (" + fmt(i.t, 3) + " + 0.05) × 25 + " + fr("(" + fmt(i.t, 3) + " + " + fmt(i.N, 0) + " × " + fmt(r.run, 4) + " × " + fmt(r.rise, 4) + ") × " + fmt(r.B, 3) + " × 25", "4"),
+           "G = " + fmt(r.Gb, 3) + " kN/m");
+  ws += E3("w = γ" + S("G") + " G + γ" + S("Q") + " Q", "w = " + fmt(i.Gf, 2) + " × " + fmt(r.Gb, 3) + " + " + fmt(i.Qf, 2) + " × " + fmt(i.Q, 2), "w = " + fmt(r.wb, 3) + " kN/m");
+  ws += E3("L" + S("B") + " = Y" + S("1") + " + Y" + S("2") + " + Y" + S("3"), "L" + S("B") + " = " + fmt(i.Y1, 3) + " + " + fmt(i.Y2, 3) + " + " + fmt(i.Y3, 3), "L" + S("B") + " = " + fmt(r.Lb, 3) + " m");
+  ws += figHtml(figBeamLoads([{L: r.Lb, w: r.wb, label: "w"}], r.Ayb, r.Byb, "Loading B-B", "LB = " + fmt(r.Lb, 3) + " m"), "Landing B-B as a simply supported beam");
+  ws += E3("A" + S("y") + " = B" + S("y") + " = " + fr("w L" + S("B"), "2"), "A" + S("y") + " = " + fr(fmt(r.wb, 3) + " × " + fmt(r.Lb, 3), "2"), "A" + S("y") + " = B" + S("y") + " = " + fmt(r.Ayb, 3) + " kN");
+  ws += E3("M" + S("max") + " = " + fr("w L" + S("B") + "²", "8"), "M" + S("max") + " = " + fr(fmt(r.wb, 3) + " × " + fmt(r.Lb, 3) + "²", "8"), "M" + S("max") + " = " + fmt(r.Mb, 3) + " kN.m");
+
+  function bsBlock(title, M, d, bars, db, mark){
+    var s = "<div class='step-head'>" + title + "</div>";
+    s += E3("b = width × 1000", "", "b = " + fmt(d.b, 0) + " mm");
+    s += E3("d = t − c" + S("c"), "d = " + fmt(i.t * 1000, 0) + " − " + fmt(i.cc, 0), "d = " + fmt(d.d, 0) + " mm");
+    s += E3("K = " + fr("M", "b d² f" + S("cu")), "K = " + fr(fmt(M, 3) + " × 10⁶", fmt(d.b, 0) + " × " + fmt(d.d, 0) + "² × " + fmt(i.fc, 0)), "K = " + fmt(d.K, 4) + "  ≤ K′ = 0.156 → " + okbad(d.Kok, "Ok", "No — compression steel needed, increase thickness"));
+    s += st("Lever arm (BS 8110 cl. 3.4.4.4):");
+    s += E3("z = d × " + "[0.5 + " + rad("0.25 − " + fr("K", "0.9")) + "]  ≤ 0.95 d",
+            "z = " + fmt(d.d, 0) + " × [0.5 + " + rad("0.25 − " + fr(fmt(d.K, 4), "0.9")) + "] = " + fmt(d.z0 * d.d, 1) + " mm ;  0.95 d = 0.95 × " + fmt(d.d, 0) + " = " + fmt(0.95 * d.d, 1) + " mm",
+            "z = " + fmt(d.z * d.d, 1) + " mm");
+    s += E3("A" + S("s,req") + " = " + fr("M", "0.87 f" + S("y") + " z"), "A" + S("s,req") + " = " + fr(fmt(M, 3) + " × 10⁶", "0.87 × " + fmt(i.fy, 0) + " × " + fmt(d.z * d.d, 1)), "A" + S("s,req") + " = " + fmt(d.Ascalc, 1) + " mm²");
+    s += E3("A" + S("s,min") + " = 0.0013 b h", "A" + S("s,min") + " = 0.0013 × " + fmt(d.b, 0) + " × " + fmt(i.t * 1000, 0), "A" + S("s,min") + " = " + fmt(d.Asmin, 1) + " mm²");
+    s += E3("A" + S("s") + " = max(A" + S("s,req") + ", A" + S("s,min") + ")", "", "A" + S("s") + " = " + fmt(d.As, 1) + " mm²");
+    s += E3("A" + S("bar") + " = " + fr("π d" + S("b") + "²", "4"), "A" + S("bar") + " = " + fr("π × " + db + "²", "4"), "A" + S("bar") + " = " + fmt(bars.A, 2) + " mm²");
+    s += E3("n = ⌈" + fr("A" + S("s"), "A" + S("bar")) + "⌉", "n = ⌈" + fr(fmt(d.As, 1), fmt(bars.A, 2)) + "⌉", "n = " + bars.n + " bars");
+    s += E3("s = ⌊" + fr("width × 100", "n") + "⌋", "s = ⌊" + fr(fmt(d.b / 10, 0), String(bars.n)) + "⌋", "s = " + bars.s + " cm");
+    s += E3("A" + S("s,prov") + " = n × A" + S("bar"), "A" + S("s,prov") + " = " + bars.n + " × " + fmt(bars.A, 2), "A" + S("s,prov") + " = " + fmt(bars.prov, 0) + " mm² ≥ " + fmt(d.As, 0) + " mm² → " + mark + " " + bars.n + "T" + db + "/" + bars.s + " cm");
+    return s;
+  }
+  function aciBlock(title, M, d, bars, db, mark){
+    var s = "<div class='step-head'>" + title + "</div>";
+    s += E3("b = width × 1000", "", "b = " + fmt(d.b, 0) + " mm");
+    s += E3("d = h − cover − " + fr("d" + S("b"), "2"), "d = " + fmt(d.h, 0) + " − " + fmt(i.cc, 0) + " − " + fr(String(db), "2"), "d = " + fmt(d.d, 1) + " mm");
+    if (d.fail) return s + eqr("<span class='bad'>Section cannot carry the moment — increase thickness.</span>");
+    s += E3("a = d − " + rad("d² − " + fr("2 M" + S("u"), "0.85 φ f′" + S("c") + " b")),
+            "a = " + fmt(d.d, 1) + " − " + rad(fmt(d.d, 1) + "² − " + fr("2 × " + fmt(M, 3) + " × 10⁶", "0.85 × 0.9 × " + fmt(i.fc, 1) + " × " + fmt(d.b, 0))),
+            "a = " + fmt(d.a, 2) + " mm");
+    s += E3("A" + S("s,req") + " = " + fr("0.85 f′" + S("c") + " a b", "f" + S("y")), "A" + S("s,req") + " = " + fr("0.85 × " + fmt(i.fc, 1) + " × " + fmt(d.a, 2) + " × " + fmt(d.b, 0), fmt(i.fy, 0)), "A" + S("s,req") + " = " + fmt(d.Ascalc, 1) + " mm²");
+    s += E3("A" + S("s,min") + " = 0.0018 b h  (ACI 7.6.1.1)", "A" + S("s,min") + " = 0.0018 × " + fmt(d.b, 0) + " × " + fmt(d.h, 0), "A" + S("s,min") + " = " + fmt(d.Asmin, 1) + " mm²");
+    s += E3("A" + S("s") + " = max(A" + S("s,req") + ", A" + S("s,min") + ")", "", "A" + S("s") + " = " + fmt(d.As, 1) + " mm²");
+    s += E3("c = " + fr("a", "β" + S("1")) + "  ≤ 0.375 d (tension-controlled, φ = 0.90)", "c = " + fr(fmt(d.a, 2), fmt(d.b1, 3)) + " ;  0.375 × " + fmt(d.d, 1) + " = " + fmt(d.cmax, 1) + " mm", "c = " + fmt(d.c, 2) + " mm → " + okbad(d.tc, "tension-controlled", "not tension-controlled"));
+    s += E3("φV" + S("c") + " = 0.75 × 0.17 λ " + rad("f′" + S("c")) + " b d  (ACI 22.5.5.1)", "φV" + S("c") + " = " + fr("0.75 × 0.17 × 1.0 × " + rad(fmt(i.fc, 1)) + " × " + fmt(d.b, 0) + " × " + fmt(d.d, 1), "1000"), "φV" + S("c") + " = " + fmt(d.phiVc, 2) + " kN ≥ V" + S("u") + " = " + fmt(d.V, 2) + " kN → " + okbad(d.Vok, "Ok", "Increase thickness"));
+    s += E3("A" + S("bar") + " = " + fr("π d" + S("b") + "²", "4"), "A" + S("bar") + " = " + fr("π × " + db + "²", "4"), "A" + S("bar") + " = " + fmt(bars.A, 2) + " mm²");
+    s += E3("n = ⌈" + fr("A" + S("s"), "A" + S("bar")) + "⌉", "n = ⌈" + fr(fmt(d.As, 1), fmt(bars.A, 2)) + "⌉", "n = " + bars.n + " bars");
+    s += E3("s ≤ min(3h, 450 mm)  (ACI 7.7.2.3)", "s" + S("max") + " = min(3 × " + fmt(d.h, 0) + ", 450)", "s = " + bars.s + " cm ≤ " + fmt(d.smax / 10, 1) + " cm");
+    s += E3("A" + S("s,prov") + " = n × A" + S("bar"), "A" + S("s,prov") + " = " + bars.n + " × " + fmt(bars.A, 2), "A" + S("s,prov") + " = " + fmt(bars.prov, 0) + " mm² ≥ " + fmt(d.As, 0) + " mm² → " + mark + " " + bars.n + "T" + db + "/" + bars.s + " cm");
+    return s;
+  }
+  if (bs) {
+    ws += bsBlock("5. Design A-A (BS 8110), width B = " + fmt(r.B, 2) + " m", r.Mmax, dA, b1, i.d1, "①②③④");
+    ws += "<div class='step-head'>6. Distribution steel ⑤</div>";
+    ws += E3("A" + S("s,dist") + " = " + fr("A" + S("s"), "5"), "A" + S("s,dist") + " = " + fr(fmt(dA.As, 1), "5"), "A" + S("s,dist") + " = " + fmt(b5.As, 1) + " mm²");
+    ws += E3("n = ⌈" + fr("A" + S("s,dist"), "A" + S("bar")) + "⌉", "n = ⌈" + fr(fmt(b5.As, 1), fmt(b5.A, 2)) + "⌉", "n = " + b5.n + " bars/m");
+    ws += E3("s = ⌊" + fr("100", "n") + "⌋", "s = ⌊" + fr("100", String(b5.n)) + "⌋", "s = " + b5.s + " cm");
+    ws += E3("Number along flight = ⌈n × L" + S("2") + "⌉", "⌈" + b5.n + " × " + fmt(r.L2, 3) + "⌉", "⑤ " + b5.cnt + "T" + i.d5 + "/" + b5.s + " cm");
+    ws += bsBlock("7. Design B-B (BS 8110), width B" + S("L") + " = " + fmt(r.Bl, 2) + " m", r.Mb, dB, b6, i.d6, "⑥");
+  } else {
+    ws += aciBlock("5. Design A-A (ACI 318M-19), width B = " + fmt(r.B, 2) + " m", r.Mmax, dA, b1, i.d1, "①②③④");
+    ws += "<div class='step-head'>6. Distribution / shrinkage steel ⑤</div>";
+    ws += E3("A" + S("s,sh") + " = 0.0018 × 1000 × h", "A" + S("s,sh") + " = 0.0018 × 1000 × " + fmt(i.t * 1000, 0), "A" + S("s,sh") + " = " + fmt(b5.As, 1) + " mm²/m");
+    ws += E3("n = ⌈" + fr("A" + S("s,sh"), "A" + S("bar")) + "⌉", "n = ⌈" + fr(fmt(b5.As, 1), fmt(b5.A, 2)) + "⌉", "n = " + b5.n0 + " bars/m");
+    ws += E3("s = min(⌊" + fr("100", "n") + "⌋, 5h, 45 cm)", "s = min(⌊" + fr("100", String(b5.n0)) + "⌋, " + fmt(b5.smax / 10, 1) + ", 45)", "s = " + b5.s + " cm");
+    ws += E3("Number along flight = ⌈" + fr("L" + S("2") + " × 100", "s") + "⌉", "⌈" + fr(fmt(r.L2 * 100, 1), String(b5.s)) + "⌉", "⑤ " + b5.cnt + "T" + i.d5 + "/" + b5.s + " cm");
+    ws += aciBlock("7. Design B-B (ACI 318M-19), width B" + S("L") + " = " + fmt(r.Bl, 2) + " m", r.Mb, dB, b6, i.d6, "⑥");
+  }
+  ws += "<div class='step-head'>8. Bar lengths</div>";
+  var cc = i.cc / 1000;
+  ws += E3("L① = ⌈1.25 X" + S("1") + " + t − 2c" + S("c") + "⌉", "L① = 1.25 × " + fmt(i.X1, 3) + " + " + fmt(i.t, 3) + " − 2 × " + fmt(cc, 3), "L① = " + fmt(Lg.L1, 0) + " cm");
+  ws += E3("L② = ⌈X" + S("1") + " + 0.25 X" + S("3") + " + L" + S("2") + "⌉", "L② = " + fmt(i.X1, 3) + " + 0.25 × " + fmt(i.X3, 3) + " + " + fmt(r.L2, 3), "L② = " + fmt(Lg.L2, 0) + " cm");
+  ws += E3("L③ = ⌈1.25 X" + S("3") + " + t − 2c" + S("c") + "⌉", "L③ = 1.25 × " + fmt(i.X3, 3) + " + " + fmt(i.t, 3) + " − 2 × " + fmt(cc, 3), "L③ = " + fmt(Lg.L3, 0) + " cm");
+  ws += E3("L④ = ⌈1.25 X" + S("3") + "⌉", "L④ = 1.25 × " + fmt(i.X3, 3), "L④ = " + fmt(Lg.L4, 0) + " cm");
+  ws += E3("L⑤ = ⌈B + 2t − 4c" + S("c") + "⌉", "L⑤ = " + fmt(r.B, 3) + " + 2 × " + fmt(i.t, 3) + " − 4 × " + fmt(cc, 3), "L⑤ = " + fmt(Lg.L5, 0) + " cm");
+  ws += E3("L⑥ = ⌈Y" + S("1") + " + Y" + S("2") + " + Y" + S("3") + " + 2t − 4c" + S("c") + "⌉", "L⑥ = " + fmt(i.Y1, 3) + " + " + fmt(i.Y2, 3) + " + " + fmt(i.Y3, 3) + " + 2 × " + fmt(i.t, 3) + " − 4 × " + fmt(cc, 3), "L⑥ = " + fmt(Lg.L6, 0) + " cm");
+  ws += "<div class='step-head'>9. Reinforcement</div>";
+  ws += figHtml(figStairReinf(i, r, b1, b5, b6), "Reinforcement arrangement (schematic)");
+  ws += schedHtml;
+  return out + ws;
+}
+
+// ---------- Excel export (live formulas) ----------
+function stairXlsx(code, v){
+  var bs = code === "BS", rows = [], addr = {}, merges = [];
+  function R(){ return rows.length + 1; }
+  function title(t){ rows.push([{v: t, s: 1}]); }
+  function head(t){ rows.push([{v: t, s: 2}, {v: "", s: 2}, {v: "", s: 2}, {v: "", s: 2}]); }
+  function inp(k, label, unit){ addr[k] = "B" + R(); rows.push([label, {v: v[k], s: 3}, unit || "", ""]); }
+  function sub(f){ return f.replace(/\{(\w+)\}/g, function(_, k){ if (!addr[k]) throw new Error("no cell for " + k); return addr[k]; }); }
+  function calc(k, label, f, unit, note){ addr[k] = "B" + R(); rows.push([label, {f: sub(f), s: 6}, unit || "", {v: note || f.replace(/[{}]/g, ""), s: 5}]); }
+  function res(k, label, f, unit, note){ addr[k] = "B" + R(); rows.push([{v: label, s: 8}, {f: sub(f), s: 4}, unit || "", {v: note || "", s: 5}]); }
+  function txt(k, label, f){ addr[k] = "B" + R(); rows.push([label, {f: sub(f), v: "", s: 8}, "", ""]); }
+  title("Staircase Design - " + (bs ? "BS 8110" : "ACI 318M-19"));
+  rows.push([{v: "Yellow cells are inputs: change them and every result below recalculates. Generated " + new Date().toLocaleString("en-GB"), s: 5}]);
+  rows.push([]);
+  head("INPUTS");
+  inp("N", "Number of risers N", ""); inp("t", "Slab thickness t", "m");
+  inp("Y1", "Y1 (flight 1 width)", "m"); inp("Y2", "Y2 (gap)", "m"); inp("Y3", "Y3 (flight 2 width)", "m");
+  inp("X1", "X1 (landing 1)", "m"); inp("X2", "X2 (going, plan)", "m"); inp("X3", "X3 (landing 2)", "m");
+  inp("Ht", "Top elevation", "m"); inp("Hb", "Bottom elevation", "m");
+  inp("fc", bs ? "fcu (f'c used)" : "f'c", "MPa"); inp("fy", "fy", "MPa"); inp("cc", bs ? "Cover cc (d = t - cc)" : "Clear cover", "mm");
+  inp("Q", "Live load Q", "kN/m"); inp("Gf", "Dead load factor", ""); inp("Qf", "Live load factor", "");
+  inp("d1", "Bars 1-4 diameter", "mm"); inp("d5", "Bar 5 diameter (distribution)", "mm"); inp("d6", "Bar 6 diameter (B-B)", "mm");
+  rows.push([]);
+  head("1. GEOMETRY");
+  calc("H", "H = Top - Bottom", "={Ht}-{Hb}", "m");
+  calc("run", "Run = X2 / N", "={X2}/{N}", "m");
+  calc("rise", "Rise = H / N", "={H}/{N}", "m");
+  calc("L1", "L1 = X1", "={X1}", "m"); calc("L2", "L2 = sqrt(X2² + H²)", "=SQRT({X2}^2+{H}^2)", "m"); calc("L3", "L3 = X3", "={X3}", "m");
+  calc("L", "L = L1 + L2 + L3", "={L1}+{L2}+{L3}", "m"); calc("B", "B = max(Y1, Y3)", "=MAX({Y1},{Y3})", "m");
+  head("2. LOADS A-A");
+  calc("G1", "G1 = Y1 (t + 0.05) x 25", "={Y1}*({t}+0.05)*25", "kN/m");
+  calc("G2", "G2 = (t + N Run Rise) B x 25 / 2", "=({t}+{N}*{run}*{rise})*{B}*25/2", "kN/m");
+  calc("w1", "w1 = Gf G1 + Qf Q", "={Gf}*{G1}+{Qf}*{Q}", "kN/m"); calc("w2", "w2 = Gf G2 + Qf Q", "={Gf}*{G2}+{Qf}*{Q}", "kN/m");
+  head("3. ANALYSIS A-A");
+  calc("P1", "P1 = w1 L1", "={w1}*{L1}", "kN"); calc("P2", "P2 = w2 L2", "={w2}*{L2}", "kN"); calc("P3", "P3 = w1 L3", "={w1}*{L3}", "kN");
+  calc("a1", "a1 = L - L1/2", "={L}-{L1}/2", "m"); calc("a2", "a2 = L - L1 - L2/2", "={L}-{L1}-{L2}/2", "m"); calc("a3", "a3 = L3/2", "={L3}/2", "m");
+  calc("Ay", "Ay = (P1 a1 + P2 a2 + P3 a3) / L", "=({P1}*{a1}+{P2}*{a2}+{P3}*{a3})/{L}", "kN");
+  calc("By", "By = P1 + P2 + P3 - Ay", "={P1}+{P2}+{P3}-{Ay}", "kN");
+  calc("V1", "V1 = -Ay", "=-{Ay}", "kN"); calc("V2", "V2 = V1 + w1 L1", "={V1}+{w1}*{L1}", "kN"); calc("V2p", "V2' = V2 X2 / L2", "={V2}*{X2}/{L2}", "kN");
+  calc("V3", "V3 = By - w1 L3", "={By}-{w1}*{L3}", "kN"); calc("V3p", "V3' = V3 X2 / L2", "={V3}*{X2}/{L2}", "kN"); calc("V4", "V4 = By", "={By}", "kN");
+  calc("N1", "N1 = V2' H / X2", "={V2p}*{H}/{X2}", "kN"); calc("N2", "N2 = V3' H / X2", "={V3p}*{H}/{X2}", "kN");
+  calc("x", "x = -N1 L2 / (N2 - N1)", "=-{N1}*{L2}/({N2}-{N1})", "m");
+  calc("M1", "M1 = -(V1 + V2) L1 / 2", "=-({V1}+{V2})*{L1}/2", "kN.m"); calc("M2", "M2 = (V3 + V4) L3 / 2", "=({V3}+{V4})*{L3}/2", "kN.m");
+  res("Mmax", "Mmax = M1 + V2'/2 x V2' L2 / (V3' - V2')", "={M1}+{V2p}/2*({V2p}*{L2}/({V3p}-{V2p}))", "kN.m");
+  head("4. ANALYSIS B-B");
+  calc("BL", "BL = max(X1, X3)", "=MAX({X1},{X3})", "m");
+  calc("Gb", "G = BL (t + 0.05) 25 + (t + N Run Rise) B 25 / 4", "={BL}*({t}+0.05)*25+({t}+{N}*{run}*{rise})*{B}*25/4", "kN/m");
+  calc("wb", "w = Gf G + Qf Q", "={Gf}*{Gb}+{Qf}*{Q}", "kN/m"); calc("Lb", "LB = Y1 + Y2 + Y3", "={Y1}+{Y2}+{Y3}", "m");
+  calc("Ayb", "Ay = By = w LB / 2", "={wb}*{Lb}/2", "kN"); res("Mb", "Mmax = w LB² / 8", "={wb}*{Lb}^2/8", "kN.m");
+  function design(p, M, W, db, V){
+    addr[p + "M"] = addr[M]; addr[p + "W"] = addr[W]; addr[p + "db"] = addr[db];
+    calc(p + "b", "b = width x 1000", "={" + p + "W}*1000", "mm");
+    if (bs) {
+      calc(p + "d", "d = t - cc", "={t}*1000-{cc}", "mm");
+      calc(p + "K", "K = M / (b d² fcu)", "={" + p + "M}*10^6/({" + p + "b}*{" + p + "d}^2*{fc})", "");
+      txt(p + "Kc", "K <= 0.156 ?", '=IF({' + p + 'K}<=0.156,"Ok","No - compression steel needed")');
+      calc(p + "z", "z = d [0.5 + sqrt(0.25 - K/0.9)] <= 0.95 d", "=MIN(0.5+SQRT(MAX(0,0.25-{" + p + "K}/0.9)),0.95)*{" + p + "d}", "mm");
+      calc(p + "Asr", "As,req = M / (0.87 fy z)", "={" + p + "M}*10^6/(0.87*{fy}*{" + p + "z})", "mm²");
+      calc(p + "Asm", "As,min = 0.0013 b h", "=0.0013*{" + p + "b}*{t}*1000", "mm²");
+    } else {
+      calc(p + "d", "d = h - cover - db/2", "={t}*1000-{cc}-{" + p + "db}/2", "mm");
+      calc(p + "a", "a = d - sqrt(d² - 2 Mu / (0.85 x 0.9 f'c b))", "={" + p + "d}-SQRT({" + p + "d}^2-2*{" + p + "M}*10^6/(0.85*0.9*{fc}*{" + p + "b}))", "mm");
+      calc(p + "Asr", "As,req = 0.85 f'c a b / fy", "=0.85*{fc}*{" + p + "a}*{" + p + "b}/{fy}", "mm²");
+      calc(p + "Asm", "As,min = 0.0018 b h", "=0.0018*{" + p + "b}*{t}*1000", "mm²");
+      calc(p + "b1", "beta1", "=IF({fc}<=28,0.85,IF({fc}>=55,0.65,0.85-0.05*({fc}-28)/7))", "");
+      txt(p + "tc", "c = a / beta1 <= 0.375 d ?", '=IF({' + p + 'a}/{' + p + 'b1}<=0.375*{' + p + 'd},"Ok (tension-controlled)","No")');
+      calc(p + "Vu", "Vu", V, "kN");
+      calc(p + "pVc", "phi Vc = 0.75 x 0.17 sqrt(f'c) b d", "=0.75*0.17*SQRT({fc})*{" + p + "b}*{" + p + "d}/1000", "kN");
+      txt(p + "Vc", "phi Vc >= Vu ?", '=IF({' + p + 'pVc}>={' + p + 'Vu},"Ok","Increase thickness")');
+      calc(p + "smax", "s,max = min(3h, 450)", "=MIN(3*{t}*1000,450)", "mm");
+    }
+    calc(p + "As", "As = max(As,req, As,min)", "=MAX({" + p + "Asr},{" + p + "Asm})", "mm²");
+    calc(p + "Ab", "A bar = pi db² / 4", "=PI()*{" + p + "db}^2/4", "mm²");
+    if (bs) {
+      res(p + "n", "n = roundup(As / A bar)", "=ROUNDUP({" + p + "As}/{" + p + "Ab},0)", "bars");
+      res(p + "s", "s = rounddown(width x 100 / n)", "=ROUNDDOWN({" + p + "W}*100/{" + p + "n},0)", "cm");
+    } else {
+      calc(p + "n0", "n = roundup(As / A bar)", "=ROUNDUP({" + p + "As}/{" + p + "Ab},0)", "bars");
+      calc(p + "s0", "s = rounddown(width x 100 / n)", "=ROUNDDOWN({" + p + "W}*100/{" + p + "n0},0)", "cm");
+      res(p + "s", "s used (<= s,max)", "=IF({" + p + "s0}*10>{" + p + "smax},INT({" + p + "smax}/10),{" + p + "s0})", "cm");
+      res(p + "n", "n used", "=IF({" + p + "s0}*10>{" + p + "smax},ROUNDUP({" + p + "W}*100/{" + p + "s},0),{" + p + "n0})", "bars");
+    }
+    res(p + "Ap", "As,prov = n x A bar", "={" + p + "n}*{" + p + "Ab}", "mm²");
+  }
+  head("5. DESIGN A-A (" + (bs ? "BS 8110" : "ACI 318M-19") + ")");
+  design("A", "Mmax", "B", "d1", "=MAX(ABS({Ay}),ABS({By}))");
+  head("6. DISTRIBUTION STEEL (bar 5)");
+  if (bs) calc("Asd", "As,dist = As / 5", "={AAs}/5", "mm²"); else calc("Asd", "As,sh = 0.0018 x 1000 x h", "=0.0018*1000*{t}*1000", "mm²/m");
+  calc("A5", "A bar = pi d5² / 4", "=PI()*{d5}^2/4", "mm²");
+  calc("n5", "n = roundup(As / A bar)", "=ROUNDUP({Asd}/{A5},0)", "bars/m");
+  if (bs) { res("s5", "s = rounddown(100 / n)", "=ROUNDDOWN(100/{n5},0)", "cm"); res("c5", "Number along flight = roundup(n L2)", "=ROUNDUP({n5}*{L2},0)", "bars"); }
+  else { res("s5", "s = min(100/n, 5h, 45 cm)", "=MIN(ROUNDDOWN(100/{n5},0),INT(MIN(5*{t}*1000,450)/10))", "cm"); res("c5", "Number along flight = roundup(L2 x 100 / s)", "=ROUNDUP({L2}*100/{s5},0)", "bars"); }
+  head("7. DESIGN B-B (" + (bs ? "BS 8110" : "ACI 318M-19") + ")");
+  design("Bb", "Mb", "BL", "d6", "={Ayb}");
+  head("8. BAR LENGTHS");
+  calc("Lg1", "L1 = roundup(1.25 X1 + t - 2cc)", "=ROUNDUP({X1}*1.25+({t}-2*{cc}/1000),2)*100", "cm");
+  calc("Lg2", "L2 = roundup(X1 + 0.25 X3 + L2)", "=ROUNDUP({X1}+{X3}*0.25+{L2},2)*100", "cm");
+  calc("Lg3", "L3 = roundup(1.25 X3 + t - 2cc)", "=ROUNDUP({X3}*1.25+({t}-2*{cc}/1000),2)*100", "cm");
+  calc("Lg4", "L4 = roundup(1.25 X3)", "=ROUNDUP({X3}*1.25,2)*100", "cm");
+  calc("Lg5", "L5 = roundup(B + 2t - 4cc)", "=ROUNDUP({B}+2*{t}-4*{cc}/1000,2)*100", "cm");
+  calc("Lg6", "L6 = roundup(Y1 + Y2 + Y3 + 2t - 4cc)", "=ROUNDUP({Y1}+{Y2}+{Y3}+2*{t}-4*{cc}/1000,2)*100", "cm");
+  head("9. REINFORCEMENT SCHEDULE");
+  [["1", "top, landing 1", "Lg1"], ["2", "bottom, landing 1 + flight", "Lg2"], ["3", "top, landing 2", "Lg3"], ["4", "bottom, landing 2", "Lg4"]].forEach(function(b){
+    txt("sch" + b[0], "(" + b[0] + ") " + b[1], '={An}&"T"&{d1}&"/"&{As}&" cm,  L = "&{' + b[2] + '}&" cm"');
+  });
+  txt("sch5", "(5) distribution", '={c5}&"T"&{d5}&"/"&{s5}&" cm,  L = "&{Lg5}&" cm"');
+  txt("sch6", "(6) section B-B", '={Bbn}&"T"&{d6}&"/"&{Bbs}&" cm,  L = "&{Lg6}&" cm"');
+  rows.push([]);
+  rows.push([{v: "Generated by the Staircase Design program. Independent engineering review required.", s: 5}]);
+  return XLSX.build([{name: bs ? "Staircase BS 8110" : "Staircase ACI 318", cols: [46, 16, 9, 60], rows: rows}]);
+}
+
+MODULES.push({
+  id: "stairBS", group: "Staircase analysis & design",
+  title: "Staircase - BS 8110", sub: "Sections A-A and B-B, K-z method, bars ①-⑥",
+  fields: stairFields("BS"),
+  run: function(){ return stairRun("BS"); },
+  xlsx: function(v){ return stairXlsx("BS", v); }
+});
+MODULES.push({
+  id: "stairACI", group: "Staircase analysis & design",
+  title: "Staircase - ACI 318M-19", sub: "Same analysis, flexure + shear + min steel per ACI 318M-19",
+  fields: stairFields("ACI"),
+  run: function(){ return stairRun("ACI"); },
+  xlsx: function(v){ return stairXlsx("ACI", v); }
+});
+
+function pileMomentGrid(){ return []; }
+// ====== UI glue ======
+var currentView = "medium";
+try { currentView = localStorage.getItem("rc-view") || "medium"; } catch (e) {}
+function setView(v){
+  currentView = v;
+  try { localStorage.setItem("rc-view", v); } catch (e) {}
+  var hp = g2("homePage");
+  if (hp) hp.setAttribute("data-view", v);
+  var sw = g2("viewSwitch");
+  if (sw) { var bs = sw.querySelectorAll("button"); for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i].getAttribute("data-view") === v); }
+}
+function renderHome(){
+  var h = "<div class='vsw' id='viewSwitch'><span>View</span>"
+    + "<button type='button' data-view='medium'>Medium</button>"
+    + "<button type='button' data-view='large'>Large</button>"
+    + "<button type='button' data-view='list'>List</button></div>";
+  var groups = [];
+  MODULES.forEach(function(m){ if (groups.indexOf(m.group) < 0) groups.push(m.group); });
+  groups.forEach(function(gr){
+    h += "<div class='grp'>" + gr + "</div><div class='grid'>";
+    MODULES.filter(function(m){ return m.group === gr; }).forEach(function(m){
+      h += "<button class='tile' type='button' data-mod='" + m.id + "'><div class='t'>" + m.title + "</div><div class='s'>" + m.sub + "</div></button>";
+    });
+    h += "</div>";
+  });
+  g2("homePage").innerHTML = h;
+  g2("verStamp").textContent = "Staircase Design v1.0.0 · 23 Nov 2026";
+  setView(currentView);
+}
+function g2(id){ return document.getElementById(id); }
+var PRINT_CSS = "@page{size:A4;margin:16mm 14mm}body{font-family:-apple-system,\"Segoe UI\",Tahoma,Arial,sans-serif;color:#1c2733;font-size:12.5px;line-height:1.55;padding:0}h1{font-size:17px;color:#1a4a6b;margin:0 0 2px}.meta{font-size:11px;color:#6b7a88;margin-bottom:12px}h2{font-size:13px;color:#1a4a6b;margin:14px 0 6px}table.inputs{width:100%;border-collapse:collapse;font-size:12px}table.inputs td{border:1px solid #d7e0e7;padding:4px 8px}table.inputs td.k{color:#6b7a88;width:58%}table.inputs td.g{background:#eef4f9;color:#1a4a6b;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase}.eq{border:1px solid #d7e0e7;border-radius:6px;padding:4px 10px;margin:3px 0;font-size:12.5px;line-height:2}.eq.res{background:#eef4f9;font-weight:600}.step{margin:8px 0 2px;font-weight:600;font-size:12px}.step-head{margin-top:14px;font-weight:700;font-size:13px;color:#1a4a6b;border-top:1.5px dashed #d7e0e7;padding-top:10px}.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 2px;line-height:1.5}.frac .num{border-bottom:1.3px solid currentColor;padding:0 4px}.frac .den{padding:0 4px}.rad{display:inline-flex;align-items:center;vertical-align:middle;border-top:1.3px solid currentColor;padding:3px 2px 0 2px}.big{font-weight:700;color:#1a4a6b;background:#eef4f9;border-radius:8px;padding:6px 10px;margin:6px 0}.ok{color:#1e7d4f;font-weight:700}.bad{color:#b33434;font-weight:700}.warn{color:#e07b39;font-weight:600}.note,.small{font-size:11px;color:#6b7a88}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}td,th{padding:4px 8px;border-bottom:1px solid #d7e0e7;text-align:left}th{color:#6b7a88;font-weight:600}hr{border:none;border-top:1px solid #d7e0e7;margin:8px 0}h4{font-size:12.5px;margin:10px 0 4px;color:#1a4a6b}";
+function fieldPrintVal(f){
+  var v = g("f_" + f.k);
+  if (f.type === "txt") return String(v).split(/\n/).filter(function(l){ return l.trim(); }).length + " rows, listed in the calculation";
+  if (f.type === "sel" && f.opts) { for (var i = 0; i < f.opts.length; i++) if (f.opts[i][0] === v) return f.opts[i][1]; }
+  return v;
+}
+var printDetail = "detailed";
+function setPdm(m){
+  printDetail = (m === "summary") ? "summary" : "detailed";
+  var pv = g2("printView");
+  if (!pv) return;
+  pv.setAttribute("data-pdm", printDetail);
+  var btns = pv.querySelectorAll("[data-pdmv]");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.toggle("on", btns[i].getAttribute("data-pdmv") === printDetail);
+}
+function printSheet(){
+  if (!currentMod) return;
+  var m = currentMod;
+  var dt = new Date().toLocaleString("en-GB", {day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"});
+  var rowsH = "", curG = null;
+  for (var i = 0; i < m.fields.length; i++) {
+    var f = m.fields[i];
+    var gname = f.grp || "";
+    if (gname !== curG) { curG = gname; if (gname) rowsH += "<tr><td class='g' colspan='2'>" + gname + "</td></tr>"; }
+    rowsH += "<tr><td class='k'>" + f.label + (f.unit ? " (" + f.unit + ")" : "") + "</td><td>" + fieldPrintVal(f) + "</td></tr>";
+  }
+  var bodyHtml = g2("res").innerHTML;
+  var head = "<h1>" + m.title + "</h1><div class='meta'>Staircase Design &nbsp;·&nbsp; " + dt + "</div>"
+    + "<h2>Inputs</h2><table class='inputs'>" + rowsH + "</table><h2>Calculation</h2>";
+  var foot = "<div class='meta' style='margin-top:14px'>Generated by the Staircase Design program.</div>";
+  var mp = g2("modPage");
+  var old = g2("printView");
+  if (old) old.remove();
+  var pv = mp.ownerDocument.createElement("div");
+  pv.id = "printView";
+  pv.setAttribute("data-pdm", printDetail);
+  pv.innerHTML = "<div class='pv-bar'>"
+    + "<div class='vsw pdm-row'><span>Sheet detail:&nbsp;</span>"
+    + "<button type='button' data-action='pdm' data-pdmv='detailed'" + (printDetail === "detailed" ? " class='on'" : "") + ">Calculation Details</button>"
+    + "<button type='button' data-action='pdm' data-pdmv='summary'" + (printDetail === "summary" ? " class='on'" : "") + ">Calculation Summary</button></div>"
+    + "<button class='go' type='button' data-action='doprint'>Print / Save PDF</button>"
+    + "<button class='go' type='button' data-action='dlpdf'>Download PDF</button>"
+    + "<button class='go' type='button' data-action='dlxlsx'>Export Excel</button>"
+    + "<button class='go' type='button' data-action='sharepdf'>Share PDF</button>"
+    + "<button class='go print' type='button' data-action='printback'>Back to calculator</button></div>"
+    + "<div class='sheet'>" + head + bodyHtml + foot + "</div>";
+  mp.appendChild(pv);
+  mp.classList.add("printing");
+  pv.scrollIntoView({block: "start"});
+}
+// ====== drawing framework (SVG on screen/print, vector ops in the generated PDF) ======
+var RC_FIGS = {}, RC_FIG_N = 0;
+var FIG_C = { conc: [0.93, 0.96, 0.98], pri: [0.10, 0.29, 0.42], acc: [0.88, 0.48, 0.22], txt: [0.11, 0.15, 0.20], mut: [0.42, 0.48, 0.53], ok: [0.12, 0.49, 0.31], steel: [0.16, 0.22, 0.29], white: [1, 1, 1] };
+function figRegister(fig){ var id = "fig" + (++RC_FIG_N); RC_FIGS[id] = fig; return id; }
+function figHtml(fig, caption){
+  var id = figRegister(fig);
+  return "<div class='fig' data-fig='" + id + "'>" + figToSvg(fig) + (caption ? "<div class='figcap'>" + caption + "</div>" : "") + "</div>";
+}
+function cssRgb(c){ return "rgb(" + Math.round(c[0] * 255) + "," + Math.round(c[1] * 255) + "," + Math.round(c[2] * 255) + ")"; }
+function figToSvg(fig){
+  var s = "<svg viewBox='0 0 " + fig.w + " " + fig.h + "' width='" + fig.w + "' role='img'>";
+  for (var i = 0; i < fig.shapes.length; i++) s += shapeSvg(fig.shapes[i]);
+  return s + "</svg>";
+}
+function shapeSvg(sh){
+  var st;
+  if (sh.t === "rect") {
+    st = "fill:" + (sh.fill ? cssRgb(sh.fill) : "none") + ";stroke:" + (sh.stroke ? cssRgb(sh.stroke) : "none") + ";stroke-width:" + (sh.sw || 1.5);
+    if (sh.dash) st += ";stroke-dasharray:" + sh.dash;
+    return "<rect x='" + sh.x + "' y='" + sh.y + "' width='" + sh.w + "' height='" + sh.h + "'" + (sh.rx ? " rx='" + sh.rx + "'" : "") + " style='" + st + "'/>";
+  }
+  if (sh.t === "circle")
+    return "<circle cx='" + sh.x + "' cy='" + sh.y + "' r='" + sh.r + "' style='fill:" + (sh.fill ? cssRgb(sh.fill) : "none") + ";stroke:" + (sh.stroke ? cssRgb(sh.stroke) : "none") + ";stroke-width:" + (sh.sw || 1) + "'/>";
+  if (sh.t === "line") {
+    st = "stroke:" + cssRgb(sh.stroke || FIG_C.mut) + ";stroke-width:" + (sh.sw || 1);
+    if (sh.dash) st += ";stroke-dasharray:" + sh.dash;
+    return "<line x1='" + sh.x1 + "' y1='" + sh.y1 + "' x2='" + sh.x2 + "' y2='" + sh.y2 + "' style='" + st + "'/>";
+  }
+  if (sh.t === "text")
+    return "<text x='" + sh.x + "' y='" + sh.y + "' font-size='" + (sh.size || 11) + "' text-anchor='" + (sh.anchor || "middle") + "' fill='" + cssRgb(sh.fill || FIG_C.txt) + "'" + (sh.bold ? " font-weight='700'" : "") + " font-family='-apple-system,Segoe UI,Tahoma,Arial,sans-serif'>" + sh.s + "</text>";
+  return "";
+}
+// leader: dot on the element (px, py), line to the label at (tx, ty)
+function figLead(shapes, px, py, tx, ty, s, c, anchor, size){
+  c = c || FIG_C.acc; anchor = anchor || "start";
+  var ex = anchor === "start" ? tx - 3 : anchor === "end" ? tx + 3 : tx, ey = ty > py ? ty - 11 : ty + 3;
+  if (anchor !== "middle") ey = ty - 4;
+  shapes.push({t: "line", x1: px, y1: py, x2: ex, y2: ey, stroke: c, sw: 0.7});
+  shapes.push({t: "circle", x: px, y: py, r: 1.6, fill: c, stroke: c, sw: 0.5});
+  shapes.push({t: "text", x: tx, y: ty, s: s, size: size || 9.5, fill: c, anchor: anchor, bold: true});
+}
+// dimension line with end ticks and centered label (array of shapes)
+function dimShapes(x1, y1, x2, y2, label, off){
+  var horiz = (y1 === y2);
+  var s = [];
+  var tl = 4;
+  if (horiz) {
+    s.push({t: "line", x1: x1, y1: y1, x2: x2, y2: y2, stroke: FIG_C.mut, sw: 1});
+    s.push({t: "line", x1: x1 - tl, y1: y1 + tl, x2: x1 + tl, y2: y1 - tl, stroke: FIG_C.mut, sw: 1});
+    s.push({t: "line", x1: x2 - tl, y1: y2 + tl, x2: x2 + tl, y2: y2 - tl, stroke: FIG_C.mut, sw: 1});
+    s.push({t: "line", x1: x1, y1: y1 - 6, x2: x1, y2: y1 + 3, stroke: FIG_C.mut, sw: 0.6});
+    s.push({t: "line", x1: x2, y1: y2 - 6, x2: x2, y2: y2 + 3, stroke: FIG_C.mut, sw: 0.6});
+    s.push({t: "text", x: (x1 + x2) / 2, y: y1 + 13, s: label, size: 10, fill: FIG_C.mut});
+  } else {
+    s.push({t: "line", x1: x1, y1: y1, x2: x2, y2: y2, stroke: FIG_C.mut, sw: 1});
+    s.push({t: "line", x1: x1 - tl, y1: y1 + tl, x2: x1 + tl, y2: y1 - tl, stroke: FIG_C.mut, sw: 1});
+    s.push({t: "line", x1: x2 - tl, y1: y2 + tl, x2: x2 + tl, y2: y2 - tl, stroke: FIG_C.mut, sw: 1});
+    s.push({t: "line", x1: x1 - 6, y1: y1, x2: x1 + 3, y2: y1, stroke: FIG_C.mut, sw: 0.6});
+    s.push({t: "line", x1: x2 - 6, y1: y2, x2: x2 + 3, y2: y2, stroke: FIG_C.mut, sw: 0.6});
+    s.push({t: "text", x: x1 + (off || -6), y: (y1 + y2) / 2 + 3, s: label, size: 10, fill: FIG_C.mut, anchor: (off && off > 0 ? "start" : "end")});
+  }
+  return s;
+}
+// rectangular reinforced-concrete cross-section
+function figSection(o){
+  var shapes = [];
+  var x0 = o.flange ? 190 : 105, y0 = (o.flange || o.labelTop || o.labelCom) ? 34 : 18;
+  var deep = o.b > 0 && (o.h / o.b) > 3;
+  var sc, bw, hh;
+  if (deep) {
+    bw = 62; hh = 118;          // schematic width: true proportions would be an unreadable sliver
+    sc = bw / o.b;
+  } else {
+    sc = Math.min(110 / o.b, 120 / o.h);
+    bw = o.b * sc; hh = o.h * sc;
+  }
+  if (o.flange && !deep) {             // T / inverted-T: scale on the flange width
+    sc = Math.min(200 / o.flange.B, 120 / o.h); bw = o.b * sc; hh = o.h * sc;
+  }
+  var scV = sc;
+  if (!deep && hh < 28) { hh = 28; scV = hh / o.h; }   // shallow strips: exaggerate thickness so two meshes stay readable
+  var broke = deep, topH = broke ? 24 : 0, gh = broke ? 14 : 0;
+  var yBot = y0 + topH + gh, botH = hh - topH - gh;
+  var ins = deep ? 6 : Math.max(5, (o.cover || 40) * sc * 0.55);
+  ins = Math.min(ins, Math.max(2, Math.min(bw, hh) / 2 - 2));
+  if (broke) {
+    shapes.push({t: "rect", x: x0, y: y0, w: bw, h: topH, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+    shapes.push({t: "rect", x: x0, y: yBot, w: bw, h: botH, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+    var g1 = y0 + topH + gh * 0.30, g2 = y0 + topH + gh * 0.62;
+    shapes.push({t: "line", x1: x0 + 3, y1: g2, x2: x0 + bw - 3, y2: g1, stroke: FIG_C.pri, sw: 1});
+    shapes.push({t: "line", x1: x0 + 3, y1: g2 + 3.5, x2: x0 + bw - 3, y2: g1 + 3.5, stroke: FIG_C.pri, sw: 1});
+  } else {
+    shapes.push({t: "rect", x: x0, y: y0, w: bw, h: hh, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+    if (o.flange) {
+      var fW = o.flange.B * sc, fT = o.flange.ts * sc, fy = o.flange.top ? y0 : y0 + hh - fT;
+      shapes.push({t: "rect", x: x0 + bw / 2 - fW / 2, y: fy, w: fW, h: fT, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+      shapes.push({t: "rect", x: x0 + 1, y: fy + (o.flange.top ? 1 : -1), w: bw - 2, h: fT, fill: FIG_C.conc, stroke: FIG_C.conc, sw: 0});
+      shapes = shapes.concat(dimShapes(x0 + bw / 2 - fW / 2, y0 - 10, x0 + bw / 2 + fW / 2, y0 - 10, "B = " + o.flange.B + " mm"));
+      shapes[shapes.length - 1].y = y0 - 14;
+      shapes = shapes.concat(dimShapes(x0 + bw / 2 + fW / 2 + 10, fy, x0 + bw / 2 + fW / 2 + 10, fy + fT, "ts = " + o.flange.ts + " mm", 6));
+    }
+  }
+  if (o.stir) {
+    if (broke) {
+      shapes.push({t: "rect", x: x0 + ins, y: y0 + ins, w: bw - 2 * ins, h: Math.max(2, topH - 2 * ins), stroke: FIG_C.pri, sw: 0.75});
+      shapes.push({t: "rect", x: x0 + ins, y: yBot + ins, w: bw - 2 * ins, h: Math.max(2, botH - 2 * ins), stroke: FIG_C.pri, sw: 0.75});
+    } else {
+      shapes.push({t: "rect", x: x0 + ins, y: y0 + ins, w: bw - 2 * ins, h: hh - 2 * ins, stroke: FIG_C.pri, sw: 0.75});
+    }
+  }
+  var nT = Math.max(1, Math.min(14, o.nTen || 3));
+  var nC = o.nCom ? Math.max(1, Math.min(8, o.nCom)) : 0;
+  var nTopM = o.nTop ? Math.max(1, Math.min(8, o.nTop)) : 0;
+  var dbT = o.dbTen || 0, dbC = o.dbCom || o.dbTen || 0, dbTop = o.dbTop || o.dbTen || 0;
+  var rMax = Math.max(1.6, (Math.min(bw, hh) - 2 * ins) / 2);
+  var rT = Math.min(rMax, dbT > 0 ? Math.max(2.2, dbT * sc / 2) : 3);
+  var rC = Math.min(rMax, dbC > 0 ? Math.max(2.0, dbC * sc / 2) : 2.6);
+  var rTopM = Math.min(rMax, dbTop > 0 ? Math.max(2.0, dbTop * sc / 2) : 2.4);
+  // layer fit - same rule as the sheet's own layer-width check: n*db + (n-1)*max(25,db) <= b - 2*cover
+  var usable = o.b - 2 * (o.cover != null ? o.cover : 40);
+  var nFit = nT;
+  if (dbT > 0 && usable > 0) {
+    var spm = Math.max(25, dbT), nf = 1;
+    while ((nf + 1) * dbT + nf * spm <= usable + 1e-9) nf++;
+    nFit = Math.max(1, nf);
+  }
+  var nL1 = nT, nL2 = 0;
+  if (nT > nFit) { nL1 = Math.min(nFit, Math.ceil(nT / 2)); nL2 = nT - nL1; }
+  // bar rows
+  var yT1;
+  if (o.d != null && !deep) yT1 = y0 + o.d * scV; else yT1 = y0 + hh - ins - rT;
+  yT1 = Math.min(yT1, y0 + hh - ins - rT);
+  var yT2 = nL2 ? Math.max(y0 + (broke ? yBot - y0 : 0) + ins + rT, yT1 - 2 * rT - Math.max(3, 25 * sc * 0.4)) : 0;
+  var xL = x0 + ins + rT, xR = x0 + bw - ins - rT;
+  var i;
+  function barRow(n, y, r, fill, strokeW){
+    for (var j = 0; j < n; j++) {
+      var x = n === 1 ? (xL + xR) / 2 : xL + (xR - xL) * j / (n - 1);
+      shapes.push({t: "circle", x: x, y: y, r: r, fill: fill, stroke: FIG_C.steel, sw: strokeW});
+    }
+  }
+  barRow(nL1, yT1, rT, FIG_C.acc, 0.75);
+  if (nL2) barRow(nL2, yT2, rT, FIG_C.acc, 0.75);
+  var yC = y0 + ((o.dp != null && !deep) ? o.dp * scV : ins + rC);
+  yC = Math.max(yC, y0 + ins + rC);
+  if (nC) barRow(nC, yC, rC, FIG_C.white, 1.25);
+  if (nTopM) {
+    var yTop = y0 + ins + rTopM;
+    barRow(nTopM, yTop, rTopM, FIG_C.acc, 0.75);
+  }
+  // bar spacing dimension between the first two tension bars
+  if (o.sDim && nL1 > 1) {
+    var xs1 = xL, xs2 = xL + (xR - xL) / (nL1 - 1), ysd = yT1 + rT + 7;
+    if (o.sClear) { xs1 += rT; xs2 -= rT; }
+    shapes.push({t: "line", x1: xs1, y1: ysd, x2: xs2, y2: ysd, stroke: FIG_C.acc, sw: 0.8});
+    shapes.push({t: "line", x1: xs1, y1: ysd - 3, x2: xs1, y2: ysd + 3, stroke: FIG_C.acc, sw: 0.8});
+    shapes.push({t: "line", x1: xs2, y1: ysd - 3, x2: xs2, y2: ysd + 3, stroke: FIG_C.acc, sw: 0.8});
+    shapes.push({t: "text", x: x0 - 8, y: ysd + 3, s: o.sDim, size: 9, fill: FIG_C.acc, anchor: "end", bold: true});
+  }
+  // web steel: both-way small dot grid
+  if (o.web) {
+    var yGridMax = (nL2 ? yT2 : yT1) - rT - 5;
+    var wy, wx;
+    for (wy = y0 + ins + 4; wy <= yGridMax; wy += 12) {
+      if (broke && wy > y0 + topH - 3 && wy < yBot + 3) continue;
+      for (wx = x0 + ins + 3; wx <= x0 + bw - ins - 2; wx += 12) {
+        shapes.push({t: "circle", x: wx, y: wy, r: 1.5, fill: FIG_C.steel, stroke: FIG_C.steel, sw: 0.5});
+      }
+    }
+  }
+  // dimensions
+  var yD = nL2 ? (yT1 * nL1 + yT2 * nL2) / nT : yT1;
+  shapes = shapes.concat(dimShapes(x0, y0 + hh + 14, x0 + bw, y0 + hh + 14, "b = " + o.b + " mm", 11));
+  var xh = x0 + bw + 20;
+  if (o.flange) xh = Math.max(xh, x0 + bw / 2 + o.flange.B * sc / 2 + 10 + (o.flange.top ? 0 : 52));
+  shapes = shapes.concat(dimShapes(xh, y0, xh, y0 + hh, "h = " + o.h + " mm", 9));
+  if (!o.noDimD) {
+    var xd0 = o.flange ? Math.min(x0, x0 + bw / 2 - o.flange.B * sc / 2) : x0;
+    shapes.push({t: "line", x1: xd0 - 20, y1: y0, x2: xd0 - 20, y2: yD, stroke: FIG_C.mut, sw: 1});
+    shapes.push({t: "line", x1: xd0 - 26, y1: y0, x2: xd0 - 12, y2: y0, stroke: FIG_C.mut, sw: 1});
+    shapes.push({t: "line", x1: xd0 - 26, y1: yD, x2: x0 - 6, y2: yD, stroke: FIG_C.mut, sw: 1, dash: "3 2"});
+    shapes.push({t: "text", x: xd0 - 30, y: (y0 + yD) / 2 + 3, s: "d = " + Math.round(o.d != null ? o.d : o.h - (o.cover || 0)) + " mm", size: 10, fill: FIG_C.mut, anchor: "end"});
+  }
+  var tx = xh + 10, maxL = 0;
+  var topLab = (o.nTop && o.labelTop) ? o.labelTop : (o.nCom && o.labelCom) ? o.labelCom : null;
+  if (topLab) {
+    var yTopBar = o.nTop ? y0 + ins + rTopM : yC;
+    figLead(shapes, xR, yTopBar, tx, Math.min(y0 - 4, yTopBar - 14), topLab);
+    maxL = Math.max(maxL, topLab.length);
+  }
+  if (o.labelTen) {
+    figLead(shapes, xR, yT1, tx, y0 + hh + 30, o.labelTen);
+    maxL = Math.max(maxL, o.labelTen.length);
+  }
+  var yb = y0 + hh + 14;
+  if (o.title) { yb += 34; shapes.push({t: "text", x: x0 + bw / 2, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); }
+  return {w: Math.max(o.flange ? 390 : 300, x0 + bw + 95, tx + maxL * 5.6 + 8), h: yb + 10, shapes: shapes};
+}
+// stirrups (shear design): section with the legs, and elevation with the spacing - only the designed stirrups are drawn
+function figStirrups(o){
+  var shapes = [], x0 = 78, y0 = 22;
+  var sc = Math.min(60 / o.b, 120 / o.h), bw = o.b * sc, hh = o.h * sc, ins = Math.max(4, 40 * sc);
+  shapes.push({t: "rect", x: x0, y: y0, w: bw, h: hh, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var n = Math.max(2, o.legs || 2), k, wi = bw - 2 * ins;
+  // outer stirrup + inner legs
+  shapes.push({t: "rect", x: x0 + ins, y: y0 + ins, w: wi, h: hh - 2 * ins, stroke: FIG_C.acc, sw: 1.8});
+  shapes.push({t: "line", x1: x0 + ins + 1, y1: y0 + ins + 1, x2: x0 + ins + 7, y2: y0 + ins + 7, stroke: FIG_C.acc, sw: 1.8});
+  shapes.push({t: "line", x1: x0 + ins + 5, y1: y0 + ins + 1, x2: x0 + ins + 11, y2: y0 + ins + 7, stroke: FIG_C.acc, sw: 1.8});
+  for (k = 1; k < n - 1; k++) {
+    var xl = x0 + ins + wi * k / (n - 1);
+    shapes.push({t: "line", x1: xl, y1: y0 + ins, x2: xl, y2: y0 + hh - ins, stroke: FIG_C.acc, sw: 1.8});
+  }
+  shapes = shapes.concat(dimShapes(x0, y0 + hh + 14, x0 + bw, y0 + hh + 14, "b = " + fmt(o.b, 0) + " mm"));
+  shapes = shapes.concat(dimShapes(x0 - 10, y0, x0 - 10, y0 + hh, "h = " + fmt(o.h, 0) + " mm", -6));
+  shapes.push({t: "text", x: x0 + bw / 2, y: y0 - 8, s: n + " legs", size: 9, fill: FIG_C.acc, bold: true});
+  // elevation
+  var ex = x0 + bw + 40, ew = 300 - ex - 10, sp = Math.max(9, Math.min(26, o.s * sc));
+  shapes.push({t: "rect", x: ex, y: y0, w: ew, h: hh, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var xs = ex + 8, xsList = [];
+  for (; xs < ex + ew - 4; xs += sp) { xsList.push(xs); shapes.push({t: "line", x1: xs, y1: y0 + ins, x2: xs, y2: y0 + hh - ins, stroke: FIG_C.acc, sw: 1.6}); }
+  if (xsList.length > 1) shapes = shapes.concat(dimShapes(xsList[1], y0 + hh + 14, xsList[2] || xsList[1] + sp, y0 + hh + 14, "s = " + fmt(o.s, 0) + " mm"));
+  shapes.push({t: "text", x: ex + ew / 2, y: y0 - 8, s: "Elevation", size: 9, fill: FIG_C.pri, bold: true});
+  var yb = y0 + hh + 50;
+  figLead(shapes, xsList[0], y0 + hh - ins - 4, xsList[0] + 2, yb, o.label, FIG_C.acc, "start", 10);
+  return {w: 340, h: yb + 10, shapes: shapes};
+}
+// deep beam elevation: main bars at the bottom, web mesh both ways
+function figDeepEl(o){
+  var shapes = [], x0 = 84, y0 = 16;
+  var sc = Math.min(190 / o.L, 120 / o.H), lw = o.L * sc, hh = o.H * sc, c = 6;
+  shapes.push({t: "rect", x: x0, y: y0, w: lw, h: hh, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var sp = Math.max(6, o.s * sc), v;
+  for (v = y0 + c + sp; v < y0 + hh - c - 8; v += sp) shapes.push({t: "line", x1: x0 + c, y1: v, x2: x0 + lw - c, y2: v, stroke: FIG_C.steel, sw: 0.7});
+  for (v = x0 + c; v <= x0 + lw - c + 0.1; v += sp) shapes.push({t: "line", x1: v, y1: y0 + c, x2: v, y2: y0 + hh - c, stroke: FIG_C.steel, sw: 0.7});
+  shapes.push({t: "line", x1: x0 + c, y1: y0 + hh - c, x2: x0 + lw - c, y2: y0 + hh - c, stroke: FIG_C.acc, sw: 2.4});
+  [x0, x0 + lw].forEach(function(sx){
+    shapes.push({t: "line", x1: sx, y1: y0 + hh, x2: sx - 6, y2: y0 + hh + 9, stroke: FIG_C.pri, sw: 1.2});
+    shapes.push({t: "line", x1: sx, y1: y0 + hh, x2: sx + 6, y2: y0 + hh + 9, stroke: FIG_C.pri, sw: 1.2});
+    shapes.push({t: "line", x1: sx - 8, y1: y0 + hh + 9, x2: sx + 8, y2: y0 + hh + 9, stroke: FIG_C.pri, sw: 1.2});
+  });
+  shapes = shapes.concat(dimShapes(x0, y0 + hh + 24, x0 + lw, y0 + hh + 24, "L = " + fmt(o.L / 1000, 2) + " m"));
+  shapes = shapes.concat(dimShapes(x0 - 12, y0, x0 - 12, y0 + hh, "H = " + fmt(o.H, 0) + " mm", -6));
+  var yb = y0 + hh + 56;
+  shapes.push({t: "text", x: 150, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true});
+  figLead(shapes, x0 + lw - 30, y0 + hh - c, x0 + lw + 14, y0 + hh + 8, o.labelMain);
+  figLead(shapes, x0 + lw - c, y0 + hh * 0.4, x0 + lw + 14, y0 + hh * 0.3, o.labelWeb, FIG_C.steel);
+  return {w: 470, h: yb + 10, shapes: shapes};
+}
+// isolated footing: plan with column + bar grid, and elevation
+function figFootingIso(o){
+  var W = 400, H = 220, shapes = [];
+  var sc = Math.min(100 / o.L, 118 / o.B);
+  var pw = o.L * sc, ph = o.B * sc, x0 = 86, y0 = 20;
+  shapes.push({t: "rect", x: x0, y: y0, w: pw, h: ph, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var cw = o.colT * sc, ch = o.colB * sc;
+  shapes.push({t: "rect", x: x0 + (pw - cw) / 2, y: y0 + (ph - ch) / 2, w: cw, h: ch, fill: FIG_C.white, stroke: FIG_C.pri, sw: 1.5});
+  var i, n = 7;
+  for (i = 1; i < n; i++) shapes.push({t: "line", x1: x0 + pw * i / n, y1: y0 + 4, x2: x0 + pw * i / n, y2: y0 + ph - 4, stroke: FIG_C.acc, sw: 0.9});
+  for (i = 1; i < n; i++) shapes.push({t: "line", x1: x0 + 4, y1: y0 + ph * i / n, x2: x0 + pw - 4, y2: y0 + ph * i / n, stroke: FIG_C.acc, sw: 0.9});
+  shapes = shapes.concat(dimShapes(x0, y0 + ph + 16, x0 + pw, y0 + ph + 16, "L = " + o.L + " mm", 12));
+  shapes = shapes.concat(dimShapes(x0 - 10, y0, x0 - 10, y0 + ph, "B = " + o.B + " mm", -8));
+  figLead(shapes, x0 + pw - 6, y0 + ph * 2 / n, x0 + pw + 16, y0 + 10, o.labelL);
+  figLead(shapes, x0 + pw * (n - 2) / n, y0 + ph - 6, x0 + pw + 16, y0 + 26, o.labelS);
+  shapes.push({t: "text", x: x0 + pw / 2, y: y0 - 7, s: "Plan", size: 10, fill: FIG_C.pri, bold: true});
+  // elevation
+  var ex = 214, ey = 170, sc2 = Math.min(80 / o.L, 66 / Math.max(o.t, 1));
+  var fw = o.L * sc2, ft = o.t * sc2;
+  shapes.push({t: "rect", x: ex, y: ey - ft, w: fw, h: ft, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var cw2 = o.colT * sc2;
+  shapes.push({t: "rect", x: ex + (fw - cw2) / 2, y: ey - ft - 40, w: cw2, h: 40, fill: FIG_C.white, stroke: FIG_C.pri, sw: 1.5});
+  shapes.push({t: "line", x1: ex - 12, y1: ey, x2: ex + fw + 12, y2: ey, stroke: FIG_C.txt, sw: 1.25});
+  for (i = 0; i < 8; i++) shapes.push({t: "line", x1: ex - 9 + i * (fw + 18) / 8, y1: ey, x2: ex - 15 + i * (fw + 18) / 8, y2: ey + 7, stroke: FIG_C.mut, sw: 0.8});
+  var yCv = ey - Math.max(6, o.cover * sc2);
+  shapes.push({t: "line", x1: ex + 6, y1: yCv, x2: ex + fw - 6, y2: yCv, stroke: FIG_C.acc, sw: 1.75});
+  for (i = 0; i < 9; i++) shapes.push({t: "circle", x: ex + 9 + (fw - 18) * i / 8, y: yCv - 2.6, r: 1.6, fill: FIG_C.acc, stroke: FIG_C.acc, sw: 0.5});
+  shapes.push({t: "text", x: ex - 4, y: yCv + 2, s: "cover " + o.cover, size: 8, fill: FIG_C.mut, anchor: "end"});
+  shapes = shapes.concat(dimShapes(ex + fw + 12, ey - ft, ex + fw + 12, ey, "t = " + o.t + " mm", 5));
+  shapes.push({t: "text", x: ex + fw / 2, y: ey + 26, s: "Elevation", size: 10, fill: FIG_C.pri, bold: true});
+  return {w: W, h: H, shapes: shapes};
+}
+// combined footing: plan with two columns
+function figFootingComb(o){
+  var W = 440, H = 165, shapes = [];
+  var sc = Math.min(212 / o.L, 105 / o.B);
+  var pw = o.L * sc, ph = o.B * sc, x0 = 82, y0 = 26;
+  shapes.push({t: "rect", x: x0, y: y0, w: pw, h: ph, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var c1w = o.col1t * sc, c1h = o.col1b * sc, c2w = o.col2t * sc, c2h = o.col2b * sc;
+  var x1 = x0 + o.x1 * sc, x2 = x0 + o.x2 * sc;
+  shapes.push({t: "rect", x: x1 - c1w / 2, y: y0 + (ph - c1h) / 2, w: c1w, h: c1h, fill: FIG_C.white, stroke: FIG_C.pri, sw: 1.5});
+  shapes.push({t: "rect", x: x2 - c2w / 2, y: y0 + (ph - c2h) / 2, w: c2w, h: c2h, fill: FIG_C.white, stroke: FIG_C.pri, sw: 1.5});
+  var i, n = 10;
+  for (i = 1; i < n; i++) shapes.push({t: "line", x1: x0 + pw * i / n, y1: y0 + 4, x2: x0 + pw * i / n, y2: y0 + ph - 4, stroke: FIG_C.acc, sw: 0.8});
+  for (i = 1; i < 5; i++) shapes.push({t: "line", x1: x0 + 4, y1: y0 + ph * i / 5, x2: x0 + pw - 4, y2: y0 + ph * i / 5, stroke: FIG_C.acc, sw: 0.8});
+  shapes = shapes.concat(dimShapes(x0, y0 + ph + 14, x0 + pw, y0 + ph + 14, "L = " + o.L + " mm", 11));
+  shapes = shapes.concat(dimShapes(x0 - 10, y0, x0 - 10, y0 + ph, "B = " + o.B + " mm", -6));
+  shapes.push({t: "line", x1: x1, y1: y0 + 2, x2: x1, y2: y0 - 10, stroke: FIG_C.mut, sw: 0.6, dash: "3 2"});
+  shapes.push({t: "line", x1: x2, y1: y0 + 2, x2: x2, y2: y0 - 10, stroke: FIG_C.mut, sw: 0.6, dash: "3 2"});
+  shapes = shapes.concat(dimShapes(x1, y0 - 10, x2, y0 - 10, ""));
+  shapes.push({t: "text", x: (x1 + x2) / 2, y: y0 - 15, s: "columns c/c = " + o.distLabel, size: 9.5, fill: FIG_C.mut});
+  shapes.push({t: "text", x: x1, y: y0 + ph / 2 - o.col1b * sc / 2 - 4, s: "C1", size: 9, fill: FIG_C.pri, bold: true});
+  shapes.push({t: "text", x: x2, y: y0 + ph / 2 - o.col2b * sc / 2 - 4, s: "C2", size: 9, fill: FIG_C.pri, bold: true});
+  figLead(shapes, x0 + pw * (n - 1) / n, y0 + ph * 0.6, x0 + pw + 14, y0 + ph * 0.6 + 14, o.barLabel);
+  if (o.barLabel2) shapes.push({t: "text", x: x0 + pw + 14, y: y0 + ph * 0.6 + 28, s: o.barLabel2, size: 9.5, fill: FIG_C.acc, bold: true, anchor: "start"});
+  return {w: W, h: H, shapes: shapes};
+}
+
+// ====== PDF sheet generation (dependency-free) ======
+
+// torsion: closed section with stirrup and bars distributed around its centerline
+function figPerim(o){
+  var shapes = [];
+  var x0 = 105, y0 = 18;
+  var sc = Math.min(120 / o.b, 120 / o.h);
+  var bw = o.b * sc, hh = o.h * sc;
+  var ins = Math.max(4, (o.cov || 25) * sc);
+  shapes.push({t: "rect", x: x0, y: y0, w: bw, h: hh, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  shapes.push({t: "rect", x: x0 + ins, y: y0 + ins, w: bw - 2 * ins, h: hh - 2 * ins, stroke: FIG_C.acc, sw: 1.6});
+  shapes.push({t: "line", x1: x0 + ins + 1, y1: y0 + ins + 1, x2: x0 + ins + 8, y2: y0 + ins + 8, stroke: FIG_C.acc, sw: 1.6});
+  shapes.push({t: "line", x1: x0 + ins + 6, y1: y0 + ins + 1, x2: x0 + ins + 13, y2: y0 + ins + 8, stroke: FIG_C.acc, sw: 1.6});
+  var n = Math.max(0, Math.min(24, o.nBars || 0)), k;
+  if (n) {
+    var rB = Math.max(2, (o.dbBar || 12) * sc / 2), xL = x0 + ins + rB, xR = x0 + bw - ins - rB, yT = y0 + ins + rB, yBo = y0 + hh - ins - rB;
+    var pts = [[xL, yT], [xR, yT], [xL, yBo], [xR, yBo]].slice(0, Math.min(4, n)), rest = Math.max(0, n - 4);
+    // remaining bars: half on each side face (long faces of the section)
+    // side bars: the same number on the left and right faces; an odd one goes to the middle of the bottom face
+    var nS = Math.floor(rest / 2);
+    for (k = 1; k <= nS; k++) { var t = k / (nS + 1); pts.push([xL, yT + (yBo - yT) * t]); pts.push([xR, yT + (yBo - yT) * t]); }
+    if (rest % 2) pts.push([(xL + xR) / 2, yBo]);
+    pts.forEach(function(q){ shapes.push({t: "circle", x: q[0], y: q[1], r: rB, fill: FIG_C.acc, stroke: FIG_C.steel, sw: 0.75}); });
+  }
+  shapes = shapes.concat(dimShapes(x0, y0 + hh + 14, x0 + bw, y0 + hh + 14, "b = " + fmt(o.b, 0) + " mm", 11));
+  shapes = shapes.concat(dimShapes(x0 + bw + 20, y0, x0 + bw + 20, y0 + hh, "h = " + fmt(o.h, 0) + " mm", 9));
+  var yb = y0 + hh + 14;
+  if (o.title) { yb += 30; shapes.push({t: "text", x: x0 + bw / 2, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); }
+  var txp = x0 + bw + 30;
+  if (o.labelStir) figLead(shapes, x0 + bw - ins, y0 + hh * 0.3, txp + 40, y0 + 6, o.labelStir);
+  if (o.labelBars && n) figLead(shapes, x0 + bw - ins - 2, y0 + hh - ins - 2, txp + 40, y0 + hh + 30, o.labelBars);
+  return {w: 420, h: yb + 10, shapes: shapes};
+}
+// shear friction: interface plane with bars crossing it
+function figShearFr(o){
+  // elevation of the shear plane: the designed bars cross the interface
+  var shapes = [], x0 = 70, y0 = 26, W = 160, Hh = 110;
+  shapes.push({t: "rect", x: x0, y: y0, w: W, h: Hh, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var yc = y0 + Hh / 2;
+  shapes.push({t: "line", x1: x0 - 14, y1: yc, x2: x0 + W + 14, y2: yc, stroke: FIG_C.pri, sw: 1.5, dash: "6 3"});
+  shapes.push({t: "text", x: x0 + W + 16, y: yc + 3, s: "shear plane", size: 9, fill: FIG_C.pri, anchor: "start"});
+  // shear arrows
+  shapes.push({t: "line", x1: x0 + 30, y1: y0 - 8, x2: x0 + W - 30, y2: y0 - 8, stroke: FIG_C.pri, sw: 1.2});
+  shapes.push({t: "line", x1: x0 + W - 36, y1: y0 - 11, x2: x0 + W - 30, y2: y0 - 8, stroke: FIG_C.pri, sw: 1.2});
+  shapes.push({t: "line", x1: x0 + W - 36, y1: y0 - 5, x2: x0 + W - 30, y2: y0 - 8, stroke: FIG_C.pri, sw: 1.2});
+  shapes.push({t: "text", x: x0 + W - 26, y: y0 - 5, s: "Vu", size: 9, fill: FIG_C.pri, anchor: "start", bold: true});
+  var n = Math.max(1, Math.min(12, o.n || 1)), k, a = (o.ang || 90) * Math.PI / 180, half = Hh / 2 - 10;
+  var dx = half * Math.cos(a) / Math.max(Math.sin(a), 0.2);
+  for (k = 0; k < n; k++) {
+    var px = n === 1 ? x0 + W / 2 : x0 + 18 + (W - 36) * k / (n - 1);
+    shapes.push({t: "line", x1: px - dx, y1: yc + half, x2: px + dx, y2: yc - half, stroke: FIG_C.acc, sw: 2});
+  }
+  var yb = y0 + Hh + 22;
+  if (o.title) { shapes.push({t: "text", x: x0 + W / 2, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); yb += 13; }
+  if (o.label) figLead(shapes, x0 + W - 18 + dx * 0.5, yc + half * 0.5, x0 + W + 16, yc + half + 4, o.label);
+  return {w: 400, h: yb + 10, shapes: shapes};
+}
+// punching: plan - column, critical perimeter at d/2, optional stud rails
+function figPunch(o){
+  var shapes = [];
+  var cx = 150, cy = 0;
+  var ext = o.studs ? 2 * (o.studs.X + (o.studs.n - 1) * o.studs.S + o.d / 2) : o.d;
+  var sc = Math.min(150 / (o.b + ext), 150 / (o.t + ext));
+  var colW = o.b * sc, colH = o.t * sc;
+  var perW = (o.b + o.d) * sc, perH = (o.t + o.d) * sc;
+  var m = 22;
+  cy = 40 + Math.max(perH, o.studs ? (o.t + ext) * sc : 0) / 2 + m;
+  var slX = cx - perW / 2 - m, slY = cy - perH / 2 - m, slW = perW + 2 * m, slH = perH + 2 * m;
+  var outW = 0, outH = 0, k;
+  if (o.studs) {
+    var AB = (o.studs.X + (o.studs.n - 1) * o.studs.S + o.d / 2) * sc;
+    outW = colW + 2 * AB; outH = colH + 2 * AB;
+    slX = Math.min(slX, cx - outW / 2 - m); slY = Math.min(slY, cy - outH / 2 - m);
+    slW = Math.max(perW + 2 * m, outW + 2 * m); slH = Math.max(perH + 2 * m, outH + 2 * m);
+  }
+  shapes.push({t: "rect", x: slX, y: slY, w: slW, h: slH, fill: FIG_C.conc, stroke: FIG_C.mut, sw: 1});
+  if (o.studs) shapes.push({t: "rect", x: cx - outW / 2, y: cy - outH / 2, w: outW, h: outH, stroke: FIG_C.mut, sw: 1, dash: "2 2"});
+  shapes.push({t: "rect", x: cx - perW / 2, y: cy - perH / 2, w: perW, h: perH, stroke: FIG_C.acc, sw: 1.5, dash: "5 3"});
+  shapes.push({t: "rect", x: cx - colW / 2, y: cy - colH / 2, w: colW, h: colH, fill: FIG_C.pri, stroke: FIG_C.pri, sw: 1});
+  if (o.studs) {
+    var X0 = o.studs.X * sc, Ss = o.studs.S * sc, nn = o.studs.n;
+    var rays = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (var r = 0; r < 4; r++) {
+      var fx = cx + rays[r][0] * colW / 2, fy = cy + rays[r][1] * colH / 2;
+      for (k = 0; k < nn; k++) {
+        var px = fx + rays[r][0] * (X0 + k * Ss), py = fy + rays[r][1] * (X0 + k * Ss);
+        shapes.push({t: "circle", x: px, y: py, r: 2.4, fill: FIG_C.acc, stroke: FIG_C.pri, sw: 0.5});
+      }
+    }
+  }
+  // dimensions: column, critical section sides
+  if (!o.studs) shapes = shapes.concat(dimShapes(cx - colW / 2, cy + colH / 2 + 8, cx + colW / 2, cy + colH / 2 + 8, fmt(o.b, 0)));
+  shapes = shapes.concat(dimShapes(cx - perW / 2, slY - 8, cx + perW / 2, slY - 8, ""));
+  shapes.push({t: "text", x: cx, y: slY - 13, s: "b + d = " + fmt(o.b + o.d, 0) + " mm", size: 10, fill: FIG_C.mut});
+  shapes = shapes.concat(dimShapes(slX + slW + 10, cy - perH / 2, slX + slW + 10, cy + perH / 2, "", 6));
+  shapes.push({t: "text", x: slX + slW + 16, y: cy + 3, s: "t + d = " + fmt(o.t + o.d, 0) + " mm", size: 10, fill: FIG_C.mut, anchor: "start"});
+  shapes.push({t: "text", x: cx + perW / 2 - 3, y: cy - perH / 2 - 3, s: "d/2", size: 8.5, fill: FIG_C.acc, anchor: "end"});
+  if (o.studs) shapes.push({t: "text", x: cx + outW / 2 - 3, y: cy + outH / 2 - 4, s: "outer bo", size: 8.5, fill: FIG_C.mut, anchor: "end"});
+  var yb = slY + slH + 16;
+  if (o.title) { shapes.push({t: "text", x: cx, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); yb += 13; }
+  var txr = slX + slW + 16;
+  if (o.label && o.studs) figLead(shapes, cx + colW / 2 + (o.studs.X + (o.studs.n - 1) * o.studs.S) * sc, cy, txr, cy + perH / 2 + 26, o.label);
+  else if (o.label) figLead(shapes, cx + perW / 2, cy + perH / 2 - 10, txr, cy + perH / 2 + 26, o.label);
+  if (o.label2 && o.studs) figLead(shapes, cx + outW / 2, cy + outH / 2 - 14, txr, cy + perH / 2 + 46, o.label2);
+  return {w: slX + slW + 16 + 5.6 * Math.max((o.label || "").length, (o.label2 || "").length, 18), h: yb + 6, shapes: shapes};
+}
+// deflection: member elevation with supports, loads and deflected shape
+function figDefl(o){
+  var shapes = [];
+  var x0 = 45, yB = 112, Lpx = 210;
+  var hpx = Math.max(9, Math.min(24, o.h / (o.L * 1000) * Lpx));
+  var i, u, px, py;
+  shapes.push({t: "rect", x: x0, y: yB - hpx, w: Lpx, h: hpx, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 1.5});
+  var amp = 13;
+  if (o.cant) {
+    shapes.push({t: "line", x1: x0, y1: yB - hpx - 10, x2: x0, y2: yB + 10, stroke: FIG_C.pri, sw: 3});
+    for (i = 0; i < 5; i++) shapes.push({t: "line", x1: x0, y1: yB - hpx - 10 + i * (hpx + 20) / 4, x2: x0 - 8, y2: yB - hpx - 10 + i * (hpx + 20) / 4 + 6, stroke: FIG_C.pri, sw: 1});
+    for (i = 1; i <= 12; i++) {
+      u = i / 12;
+      shapes.push({t: "line", x1: x0 + (i - 1) / 12 * Lpx, y1: yB + amp * Math.pow((i - 1) / 12, 2), x2: x0 + u * Lpx, y2: yB + amp * u * u, stroke: FIG_C.mut, sw: 1, dash: "4 3"});
+    }
+  } else {
+    for (i = 0; i < 2; i++) {
+      var sx = i ? x0 + Lpx : x0;
+      shapes.push({t: "line", x1: sx, y1: yB, x2: sx - 7, y2: yB + 10, stroke: FIG_C.pri, sw: 1.5});
+      shapes.push({t: "line", x1: sx, y1: yB, x2: sx + 7, y2: yB + 10, stroke: FIG_C.pri, sw: 1.5});
+      shapes.push({t: "line", x1: sx - 9, y1: yB + 10, x2: sx + 9, y2: yB + 10, stroke: FIG_C.pri, sw: 1.5});
+    }
+    for (i = 1; i <= 12; i++) {
+      u = i / 12;
+      shapes.push({t: "line", x1: x0 + (i - 1) / 12 * Lpx, y1: yB + amp * 4 * (i - 1) / 12 * (1 - (i - 1) / 12), x2: x0 + u * Lpx, y2: yB + amp * 4 * u * (1 - u), stroke: FIG_C.mut, sw: 1, dash: "4 3"});
+    }
+  }
+  var yTop = yB - hpx;
+  if (o.w > 0) {
+    for (i = 0; i <= 6; i++) {
+      px = x0 + 8 + (Lpx - 16) * i / 6;
+      shapes.push({t: "line", x1: px, y1: yTop - 14, x2: px, y2: yTop - 2, stroke: FIG_C.acc, sw: 1.2});
+      shapes.push({t: "line", x1: px - 2.5, y1: yTop - 6, x2: px, y2: yTop - 2, stroke: FIG_C.acc, sw: 1.2});
+      shapes.push({t: "line", x1: px + 2.5, y1: yTop - 6, x2: px, y2: yTop - 2, stroke: FIG_C.acc, sw: 1.2});
+    }
+    shapes.push({t: "line", x1: x0 + 8, y1: yTop - 14, x2: x0 + Lpx - 8, y2: yTop - 14, stroke: FIG_C.acc, sw: 1.2});
+    shapes.push({t: "text", x: x0 + Lpx, y: yTop - 19, s: "w = " + fmt(o.w, 0) + " kN/m", size: 9, fill: FIG_C.acc, anchor: "end"});
+  }
+  if (o.P > 0) {
+    for (i = 1; i <= 2; i++) {
+      px = o.cant ? x0 + Lpx : x0 + Lpx * i / 3;
+      var yTip = yTop - (o.w > 0 ? 32 : 2);
+      shapes.push({t: "line", x1: px, y1: yTip - 26, x2: px, y2: yTip, stroke: FIG_C.pri, sw: 1.8});
+      shapes.push({t: "line", x1: px - 3.5, y1: yTip - 6, x2: px, y2: yTip, stroke: FIG_C.pri, sw: 1.8});
+      shapes.push({t: "line", x1: px + 3.5, y1: yTip - 6, x2: px, y2: yTip, stroke: FIG_C.pri, sw: 1.8});
+      shapes.push({t: "text", x: px, y: yTip - 30, s: "P", size: 9.5, fill: FIG_C.pri, bold: true});
+      if (o.cant) break;
+    }
+    shapes.push({t: "text", x: x0, y: yTop - 50, s: "P = " + fmt(o.P, 0) + " kN", size: 9, fill: FIG_C.pri, anchor: "start", bold: true});
+  }
+  var yD = yB + (o.cant ? amp + 6 : 26);
+  shapes = shapes.concat(dimShapes(x0, yD, x0 + Lpx, yD, "L = " + fmt(o.L, 2) + " m", 11));
+  var yb = yD + 26;
+  if (o.title) { shapes.push({t: "text", x: 150, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); }
+  return {w: 300, h: yb + 8, shapes: shapes};
+}
+// pile cap: plan with pile grid and column
+function figPileCap(o){
+  var shapes = [];
+  var x0 = 100, y0 = o.M ? 44 : 26;
+  var sc = Math.min(150 / o.L, 140 / o.B);
+  var pw = o.L * sc, ph = o.B * sc;
+  var ex = (o.ext || 0) * sc;
+  shapes.push({t: "rect", x: x0 - ex, y: y0 - ex, w: pw + 2 * ex, h: ph + 2 * ex, fill: FIG_C.conc, stroke: FIG_C.mut, sw: 1});
+  var gi;
+  for (gi = 1; gi < 8; gi++) shapes.push({t: "line", x1: x0 - ex + (pw + 2 * ex) * gi / 8, y1: y0 - ex + 3, x2: x0 - ex + (pw + 2 * ex) * gi / 8, y2: y0 + ph + ex - 3, stroke: FIG_C.acc, sw: 0.7});
+  for (gi = 1; gi < 6; gi++) shapes.push({t: "line", x1: x0 - ex + 3, y1: y0 - ex + (ph + 2 * ex) * gi / 6, x2: x0 + pw + ex - 3, y2: y0 - ex + (ph + 2 * ex) * gi / 6, stroke: FIG_C.acc, sw: 0.7});
+  var r = Math.max(2.5, o.pd / 2 * sc), i, j;
+  for (i = 0; i < o.nl; i++) for (j = 0; j < o.ns; j++) {
+    var px = x0 + pw / 2 + (i - (o.nl - 1) / 2) * o.sl * 1000 * sc;
+    var py = y0 + ph / 2 + (j - (o.ns - 1) / 2) * o.ss * 1000 * sc;
+    shapes.push({t: "circle", x: px, y: py, r: r, fill: FIG_C.white, stroke: FIG_C.pri, sw: 1.5});
+  }
+  shapes.push({t: "rect", x: x0 + pw / 2 - o.colB * sc / 2, y: y0 + ph / 2 - o.colT * sc / 2, w: o.colB * sc, h: o.colT * sc, fill: FIG_C.pri, stroke: FIG_C.pri, sw: 1});
+  if (o.M) {
+    var yM = y0 - ex - 12;
+    shapes.push({t: "line", x1: x0 + 10, y1: yM, x2: x0 + pw - 10, y2: yM, stroke: FIG_C.acc, sw: 1.5});
+    shapes.push({t: "line", x1: x0 + pw - 16, y1: yM - 4, x2: x0 + pw - 10, y2: yM, stroke: FIG_C.acc, sw: 1.5});
+    shapes.push({t: "line", x1: x0 + pw - 16, y1: yM + 4, x2: x0 + pw - 10, y2: yM, stroke: FIG_C.acc, sw: 1.5});
+    shapes.push({t: "text", x: x0 + pw / 2, y: yM - 5, s: o.Mlabel || "M", size: 10, fill: FIG_C.acc, bold: true});
+  }
+  var x1p = x0 + pw / 2 - (o.nl - 1) / 2 * o.sl * 1000 * sc, y1p = y0 + ph / 2 - (o.ns - 1) / 2 * o.ss * 1000 * sc;
+  var yDm = y0 + ph + ex + 14;
+  if (o.nl > 1) shapes = shapes.concat(dimShapes(x1p, yDm, x1p + o.sl * 1000 * sc, yDm, fmt(o.sl, 2) + " m"));
+  shapes = shapes.concat(dimShapes(x0 - ex, yDm + 18, x0 + pw + ex, yDm + 18, "L = " + fmt(o.L + 2 * o.ext, 0) + " mm"));
+  shapes = shapes.concat(dimShapes(x0 - ex - 12, y0 - ex, x0 - ex - 12, y0 + ph + ex, "B = " + fmt(o.B + 2 * o.ext, 0) + " mm", -8));
+  if (o.ns > 1) shapes = shapes.concat(dimShapes(x0 + pw + ex + 10, y1p, x0 + pw + ex + 10, y1p + o.ss * 1000 * sc, fmt(o.ss, 2) + " m", 6));
+  var yb = yDm + 18;
+  if (o.title) { yb += 30; shapes.push({t: "text", x: x0 + pw / 2, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); }
+  if (o.label) { yb += 13; shapes.push({t: "text", x: x0 + pw / 2, y: yb, s: o.label, size: 10, fill: FIG_C.acc, bold: true}); }
+  var txm = x0 + pw + ex + 16;
+  if (o.barLabel) figLead(shapes, x0 - ex + (pw + 2 * ex) * 7 / 8, y0 + ph + ex - 8, txm, y0 + ph + ex + 8, o.barLabel);
+  return {w: txm + 5.6 * (o.barLabel || "").length + 8, h: yb + 10, shapes: shapes};
+}
+// cantilever retaining wall cross-section (dimensions in m)
+function figRetWall(o){
+  var shapes = [];
+  var x0 = 78, y0 = 16;
+  var sc = Math.min(150 / (o.B + 2 * o.ex), 110 / (o.hw + o.tb + o.tp));
+  var hwH = o.hw * sc, tbH = o.tb * sc, tpH = Math.max(2.5, o.tp * sc);
+  var yB = y0 + hwH;
+  shapes.push({t: "rect", x: x0, y: yB + tbH, w: (o.B + 2 * o.ex) * sc, h: tpH, fill: FIG_C.conc, stroke: FIG_C.mut, sw: 1});
+  shapes.push({t: "rect", x: x0 + o.ex * sc, y: yB, w: o.B * sc, h: tbH, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var sx = x0 + (o.ex + o.toe) * sc, sw = o.tw * sc;
+  shapes.push({t: "rect", x: sx, y: y0, w: sw, h: hwH, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var soilX = sx + sw, soilW = (x0 + (o.ex + o.B) * sc) - soilX;
+  if (soilW > 3 && o.hr > 0) {
+    var soilH = o.hr * sc;
+    shapes.push({t: "rect", x: soilX, y: yB - soilH, w: soilW, h: soilH, stroke: FIG_C.mut, sw: 1, dash: "3 2"});
+    shapes.push({t: "line", x1: soilX, y1: yB - soilH, x2: soilX + soilW + 10, y2: yB - soilH, stroke: FIG_C.mut, sw: 1.5});
+    shapes.push({t: "text", x: soilX + soilW + 12, y: yB - soilH + 3, s: "soil " + fmt(o.hr, 2) + " m", size: 9, fill: FIG_C.mut, anchor: "start"});
+  }
+  // designed steel: wall bars on the soil face anchored into the base, base bars at the bottom
+  var cvp = 3;
+  shapes.push({t: "line", x1: sx + sw - cvp, y1: y0 + cvp, x2: sx + sw - cvp, y2: yB + tbH - cvp, stroke: FIG_C.acc, sw: 1.8});
+  shapes.push({t: "line", x1: sx + sw - cvp, y1: yB + tbH - cvp, x2: sx + sw - cvp - 18, y2: yB + tbH - cvp, stroke: FIG_C.acc, sw: 1.8});
+  shapes.push({t: "line", x1: x0 + o.ex * sc + cvp, y1: yB + tbH - cvp - 2.5, x2: x0 + (o.ex + o.B) * sc - cvp, y2: yB + tbH - cvp - 2.5, stroke: FIG_C.acc, sw: 1.8});
+  figLead(shapes, sx + sw - cvp, y0 + hwH * 0.35, sx + sw + 42, y0 + hwH * 0.35 - 12, o.labelWall || "wall bars");
+  shapes.push({t: "text", x: x0 + o.ex * sc + 2, y: yB - 3, s: "toe", size: 8, fill: FIG_C.mut, anchor: "start"});
+  if (o.labelBase) figLead(shapes, x0 + (o.ex + o.B * 0.3) * sc, yB + tbH - cvp - 2.5, sx + sw + 42, yB + tbH + 30, o.labelBase);
+  shapes.push({t: "text", x: x0 + (o.ex + o.B) * sc - 2, y: yB + tbH + 10 + tpH, s: "", size: 8, fill: FIG_C.mut, anchor: "end"});
+  shapes = shapes.concat(dimShapes(x0, yB + tbH + tpH + 14, x0 + (o.B + 2 * o.ex) * sc, yB + tbH + tpH + 14, "B = " + fmt(o.B + 2 * o.ex, 2) + " m", 11));
+  shapes = shapes.concat(dimShapes(x0 - 12, y0, x0 - 12, yB, "hw = " + fmt(o.hw, 2) + " m", -8));
+  var yb = yB + tbH + tpH + 14;
+  if (o.title) { yb += 28; shapes.push({t: "text", x: 150, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); }
+  return {w: 380, h: yb + 8, shapes: shapes};
+}
+// shear wall elevation with distributed horizontal reinforcement
+function figShearWallEl(o){
+  var shapes = [];
+  var x0 = 65, y0 = 18;
+  var pw = 135, ph = 100;
+  shapes.push({t: "rect", x: x0, y: y0, w: pw, h: ph, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var wx, wy;
+  for (wy = y0 + 9; wy < y0 + ph - 4; wy += 11)
+    shapes.push({t: "line", x1: x0 + 5, y1: wy, x2: x0 + pw - 5, y2: wy, stroke: FIG_C.acc, sw: 1.4});
+  shapes = shapes.concat(dimShapes(x0 - 10, y0 + 9, x0 - 10, y0 + 20, "S", -6));
+  shapes = shapes.concat(dimShapes(x0, y0 + ph + 16, x0 + pw, y0 + ph + 16, "lw = " + fmt(o.lw, 0) + " mm", 11));
+  shapes = shapes.concat(dimShapes(x0 + pw + 20, y0, x0 + pw + 20, y0 + ph, "hw = " + fmt(o.hw / 1000, 1) + " m", 9));
+  var yb = y0 + ph + 16;
+  if (o.title) { yb += 28; shapes.push({t: "text", x: x0 + pw / 2, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); }
+  if (o.label) figLead(shapes, x0 + pw * 0.75, y0 + 9 + 11 * 3, x0 + pw + 50, y0 + ph + 2, o.label);
+  return {w: 380, h: yb + 8, shapes: shapes};
+}
+// T-section geometry with centroid axis
+function figTsec(o){
+  var shapes = [];
+  var x0 = 100, y0 = 24;
+  var sc = Math.min(150 / o.B, 115 / o.h);
+  var fw = o.B * sc, ft = o.ts * sc, ww = o.bw * sc, wh = (o.h - o.ts) * sc;
+  shapes.push({t: "rect", x: x0, y: y0, w: fw, h: ft, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  shapes.push({t: "rect", x: x0 + (fw - ww) / 2, y: y0 + ft, w: ww, h: wh, fill: FIG_C.conc, stroke: FIG_C.pri, sw: 2});
+  var ycg = y0 + o.ycg * sc;
+  shapes.push({t: "line", x1: x0 - 14, y1: ycg, x2: x0 + fw + 14, y2: ycg, stroke: FIG_C.acc, sw: 1.2, dash: "6 3"});
+  shapes.push({t: "text", x: x0 + fw + 16, y: ycg + 12, s: "c.g.", size: 9, fill: FIG_C.acc, anchor: "start", bold: true});
+  shapes = shapes.concat(dimShapes(x0 - 12, y0, x0 - 12, ycg, "yt = " + fmt(o.ycg, 0) + " mm", -6));
+  shapes = shapes.concat(dimShapes(x0, y0 - 6, x0 + fw, y0 - 6, ""));
+  shapes.push({t: "text", x: x0 + fw / 2, y: y0 - 9, s: "B = " + fmt(o.B, 0) + " mm", size: 10, fill: FIG_C.mut});
+  shapes = shapes.concat(dimShapes(x0 + (fw - ww) / 2, y0 + ft + wh + 14, x0 + (fw + ww) / 2, y0 + ft + wh + 14, "bw = " + fmt(o.bw, 0) + " mm"));
+  shapes = shapes.concat(dimShapes(x0 + fw + 10, y0, x0 + fw + 10, y0 + ft, "ts = " + fmt(o.ts, 0) + " mm", 6));
+  shapes = shapes.concat(dimShapes(x0 + fw + 80, y0, x0 + fw + 80, y0 + ft + wh, "h = " + fmt(o.h, 0) + " mm", 6));
+  var yb = y0 + ft + wh + 14;
+  if (o.title) { yb += 28; shapes.push({t: "text", x: x0 + fw / 2, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true}); }
+  return {w: 400, h: yb + 8, shapes: shapes};
+}
+// development length: bar with Ld dimension and hook
+function figDev(o){
+  var shapes = [];
+  var x0 = 42, yB = 58;
+  var Lpx = Math.min(150, Math.max(60, o.ld * 0.10)), Lh = Math.min(Lpx, Math.max(30, o.ldh * 0.10));
+  var sw = Math.max(3, (o.db || 16) * 0.35);
+  shapes.push({t: "line", x1: x0, y1: yB, x2: x0 + Lpx, y2: yB, stroke: FIG_C.steel, sw: sw});
+  shapes.push({t: "circle", x: x0, y: yB, r: sw / 2, fill: FIG_C.steel, stroke: FIG_C.steel, sw: 0.5});
+  shapes.push({t: "text", x: x0 - 4, y: yB - 10, s: "T" + o.db, size: 10, fill: FIG_C.acc, anchor: "start", bold: true});
+  var exPx = Math.max(10, Math.min(30, o.lext * 0.10));
+  shapes.push({t: "text", x: x0 + Lpx + 6, y: yB + 3, s: "straight bar", size: 8.5, fill: FIG_C.mut, anchor: "start"});
+  // hooked bar below: Ldh from the critical section to the outside of the hook
+  var yH2 = yB + 64, xh = x0, xe = x0 + Lh;
+  shapes.push({t: "line", x1: xh, y1: yH2, x2: xe, y2: yH2, stroke: FIG_C.steel, sw: sw});
+  if (o.hook === "90") {
+    shapes.push({t: "line", x1: xe, y1: yH2, x2: xe, y2: yH2 + exPx, stroke: FIG_C.steel, sw: sw});
+  } else {
+    var rr = exPx / 3, kk, pX = xe, pY = yH2;
+    for (kk = 1; kk <= 8; kk++) { var aa = -Math.PI / 2 + Math.PI * kk / 8, qx = xe + rr * Math.cos(aa), qy = yH2 + rr + rr * Math.sin(aa); shapes.push({t: "line", x1: pX, y1: pY, x2: qx, y2: qy, stroke: FIG_C.steel, sw: sw}); pX = qx; pY = qy; }
+    shapes.push({t: "line", x1: pX, y1: pY, x2: pX - exPx, y2: pY, stroke: FIG_C.steel, sw: sw});
+  }
+  shapes.push({t: "line", x1: xh, y1: yH2 - 14, x2: xh, y2: yH2 + exPx + 6, stroke: FIG_C.mut, sw: 0.8, dash: "3 2"});
+  shapes.push({t: "text", x: xh - 3, y: yH2 - 16, s: "critical section", size: 8, fill: FIG_C.mut, anchor: "start"});
+  var xo = xe + sw / 2 + (o.hook === "90" ? 0 : exPx / 3);
+  shapes = shapes.concat(dimShapes(xh, yH2 + exPx + 14, xo, yH2 + exPx + 14, "Ldh = " + fmt(o.ldh, 0) + " mm"));
+  if (false) {
+    var rA = exPx / 2, cxA = x0 + Lpx, cyA = yB + rA, k;
+    var nSeg = 8, prevX = cxA, prevY = yB;
+    for (k = 1; k <= nSeg; k++) {
+      var a = -Math.PI / 2 + Math.PI * k / nSeg;
+      var px = cxA + rA * Math.cos(a), py = cyA + rA * Math.sin(a);
+      shapes.push({t: "line", x1: prevX, y1: prevY, x2: px, y2: py, stroke: FIG_C.steel, sw: sw});
+      prevX = px; prevY = py;
+    }
+    shapes.push({t: "line", x1: cxA - rA, y1: cyA, x2: cxA - rA - exPx, y2: cyA, stroke: FIG_C.steel, sw: sw});
+    shapes.push({t: "text", x: cxA + rA + 6, y: cyA + 3, s: "Ldh = " + fmt(o.ldh, 0) + " mm", size: 9, fill: FIG_C.mut, anchor: "start"});
+  }
+  shapes = shapes.concat(dimShapes(x0, yB + 14, x0 + Lpx, yB + 14, "Ld = " + fmt(o.ld, 0) + " mm", 11));
+  var yb = yH2 + exPx + 48;
+  if (o.title) shapes.push({t: "text", x: 150, y: yb, s: o.title, size: 10.5, fill: FIG_C.pri, bold: true});
+  return {w: 300, h: yb + 8, shapes: shapes};
+}
+
+var PDF_SYM = [
+  [/\u2113/g,"l"],[/\u230a/g,"floor("],[/\u230b/g,")"],[/\u03c8/g,"psi"],[/\u2248/g,"~"],[/\u2070/g,"^0"],[/\u2080/g,"0"],[/\u2081/g,"1"],[/\u2082/g,"2"],[/\u2083/g,"3"],[/\u2084/g,"4"],[/\u2085/g,"5"],[/\u2086/g,"6"],[/\u2087/g,"7"],[/\u2088/g,"8"],[/\u2089/g,"9"],[/\u2154/g,"2/3"],[/\u2193/g,"(down)"],[/\u27c2/g,"perp. to"],[/\u1fb1/g,"alpha-bar"],[/\u0304/g,"-bar"],[/\u0302/g,"-hat"],[/\u03b7/g,"eta"],[/\u03d5/g,"\u00d8"],[/\u00bc/g,"1/4"],
+  [/\u2460/g,"(1)"],[/\u2461/g,"(2)"],[/\u2462/g,"(3)"],[/\u2463/g,"(4)"],[/\u2464/g,"(5)"],[/\u2465/g,"(6)"],[/\u2466/g,"(7)"],[/\u2467/g,"(8)"],[/\u2468/g,"(9)"],[/\u2469/g,"(10)"],
+  [/\u03c6/g,"phi"],[/\u03a6/g,"Phi"],[/\u03b2/g,"beta"],[/\u03b5/g,"eps"],[/\u03b3/g,"gamma"],[/\u03bc/g,"mu"],[/\u03bb/g,"lambda"],[/\u03c0/g,"pi"],
+  [/\u03c1/g,"rho"],[/\u03b1/g,"alpha"],[/\u0394/g,"Delta"],[/\u03b8/g,"theta"],[/\u03c3/g,"sigma"],[/\u03c9/g,"w"],[/\u221a/g,"sqrt"],
+  [/\u2265/g,">="],[/\u2264/g,"<="],[/\u00d7/g,"x"],[/\u2212/g,"-"],[/\u00b2/g,"^2"],[/\u00b3/g,"^3"],[/\u00b0/g," deg"],[/\u00b7/g,"."],[/\u00b1/g,"+/-"],
+  [/\u2308/g,"ceil("],[/\u2309/g,")"],[/\u2713/g,"OK: "],[/\u2717/g,"FAIL: "],[/\u2033/g,'"'],[/\u2032/g,"'"],[/\u2014/g,"-"],[/\u2013/g,"-"],[/\u00a0/g," "],
+  [/\u221b/g,"cbrt"],[/\u2192/g,"->"],[/\u26a0/g,"! "],
+  [/\u00f7/g,"/"],[/\u230a/g,"floor("],[/\u230b/g,")"],[/\u00b9/g,"^1"],
+  [/\u2070/g,"^0"],[/\u2074/g,"^4"],[/\u2075/g,"^5"],[/\u2076/g,"^6"],[/\u2077/g,"^7"],[/\u2078/g,"^8"],[/\u2079/g,"^9"],
+  [/\u207a/g,"^+"],[/\u207b/g,"^-"],
+  [/\u2260/g,"!="],[/\u03c7/g,"chi"],[/\u03b7/g,"eta"],[/\u03bd/g,"nu"],[/\u03c4/g,"tau"],[/\u03b6/g,"zeta"],[/\u03ba/g,"kappa"],[/\u03a9/g,"Omega"],[/\u03a3/g,"Sum"],[/\u03c8/g,"psi"],[/\u03be/g,"xi"],[/\u03b4/g,"delta"],[/\u2248/g,"~"],[/\u2026/g,"..."],[/\u00d8/g,"~DIA~"]
+];
+function pdfClean(s){
+  s = String(s);
+  s = s.replace(/10\u207b([\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079])/g, function(m, d){ return "10^-" + String("\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079".indexOf(d)); });
+  for (var i = 0; i < PDF_SYM.length; i++) s = s.replace(PDF_SYM[i][0], PDF_SYM[i][1]);
+  s = s.replace(/sqrt\s*sqrt\(/g, "sqrt(");
+  s = s.replace(/\s+/g, " ").trim();
+  s = s.replace(/[^\x20-\x7E]/g, "?");
+  return s.replace(/\^2/g, "\xb2").replace(/\^3/g, "\xb3").replace(/\^1/g, "\xb9").replace(/~DIA~/g, "\xd8");
+}
+function nodeChildren(node){
+  var s = "";
+  for (var i = 0; i < node.childNodes.length; i++) s += nodeText(node.childNodes[i]);
+  return s;
+}
+function nodeText(node){
+  if (node.nodeType === 3) return node.nodeValue;
+  if (node.nodeType !== 1) return "";
+  var cls = " " + (node.className || "") + " ";
+  if (cls.indexOf(" frac ") >= 0) {
+    var num = node.querySelector(".num"), den = node.querySelector(".den");
+    return "(" + nodeChildren(num) + ")/(" + nodeChildren(den) + ")";
+  }
+  if (cls.indexOf(" rad ") >= 0) return "sqrt(" + nodeChildren(node) + ")";
+  return nodeChildren(node);
+}
+function htmlToLines(el, lines){
+  for (var i = 0; i < el.children.length; i++) {
+    var c = el.children[i];
+    var cls = " " + (c.className || "") + " ";
+    var tag = c.tagName.toLowerCase();
+    if (printDetail === "summary" && cls.indexOf(" sub ") >= 0) continue;
+    if (cls.indexOf(" fig ") >= 0) {
+      var figId = c.getAttribute("data-fig");
+      if (figId && RC_FIGS[figId]) { lines.push({t: "", s: "fig", fig: figId}); }
+      if (c.querySelector(".figcap")) lines.push({t: pdfClean(nodeChildren(c.querySelector(".figcap"))), s: "note"});
+      continue;
+    }
+    if (cls.indexOf(" simg ") >= 0) { var im0 = c.querySelector("img"); if (im0) lines.push({t: "", s: "img", el: im0}); if (c.querySelector(".figcap")) lines.push({t: pdfClean(nodeChildren(c.querySelector(".figcap"))), s: "note"}); continue; }
+    if (tag === "hr") { lines.push({t: "", s: "gap"}); continue; }
+    if (tag === "table") {
+      var trs = c.querySelectorAll("tr");
+      for (var r = 0; r < trs.length; r++) {
+        var tds = trs[r].querySelectorAll("th,td");
+        if (tds.length >= 2) lines.push({t: pdfClean(nodeChildren(tds[0])) + ":  " + pdfClean(nodeChildren(tds[1])), s: tds[0].tagName.toLowerCase() === "th" ? "theader" : "eq"});
+        else if (tds.length === 1) lines.push({t: pdfClean(nodeChildren(tds[0])), s: "eq"});
+      }
+      continue;
+    }
+    var style = "eq";
+    if (cls.indexOf(" step-head ") >= 0) style = "h2";
+    else if (cls.indexOf(" res ") >= 0) style = "res";
+    else if (cls.indexOf(" big ") >= 0) style = "big";
+    else if (cls.indexOf(" step ") >= 0) style = "step";
+    else if (cls.indexOf(" note ") >= 0 || cls.indexOf(" warn ") >= 0) style = "note";
+    if (cls.indexOf(" eq ") >= 0 && c.querySelector) {
+      lines.push({t: pdfClean(nodeChildren(c)), s: "eqx", base: style, node: c});
+      continue;
+    }
+    lines.push({t: pdfClean(nodeChildren(c)), s: style});
+  }
+}
+function sheetLines(){
+  var m=currentMod,dt=new Date().toLocaleString("en-GB");
+  var inputs=[{t:"Inputs",s:"h2"}],curG=null;
+  m.fields.forEach(function(f){var group=f.grp||"";if(group!==curG){curG=group;if(group)inputs.push({t:group,s:"gh"});}inputs.push({t:pdfClean(f.label+(f.unit?" ("+f.unit+")":""))+":  "+pdfClean(fieldPrintVal(f)),s:"eq"});});
+  var calc=[];htmlToLines(g2("res"),calc);
+  var fig=calc.filter(function(l){return l.s==="fig";})[0];
+  var f0=calc.findIndex(function(l){return l.s==="fig";});calc=calc.filter(function(l,i){return !(i===f0||(f0>=0&&i===f0+1&&l.s==="note"));});
+  var worked=calc.findIndex(function(l){return l.s==="h2"&&l.t.indexOf("Worked solution")===0;});
+  var summary=worked>=0?calc.splice(0,worked):[];
+  return [{t:m.title,s:"h1"},{t:"Staircase Design  |  "+dt,s:"meta"},{s:"intro",inputs:inputs,fig:fig&&fig.fig,summary:summary},{s:"columns"},{t:"Calculation",s:"h2"}].concat(calc,[{t:"Generated by the Staircase Design program. Independent engineering review required.",s:"meta"}]);
+}
+var PDF_STYLES = {
+  h1:     {f: "F2", size: 15,   rgb: [0.10, 0.29, 0.42], before: 0, lh: 1.3},
+  meta:   {f: "F1", size: 8.5,  rgb: [0.42, 0.48, 0.53], before: 2, lh: 1.3},
+  h2:     {f: "F2", size: 12,   rgb: [0.10, 0.29, 0.42], before: 10, lh: 1.3},
+  gh:     {f: "F2", size: 9.5,  rgb: [0.10, 0.29, 0.42], before: 6, lh: 1.3},
+  step:   {f: "F2", size: 10,   rgb: [0.11, 0.15, 0.20], before: 7, lh: 1.35},
+  eq:     {f: "F1", size: 10,   rgb: [0.11, 0.15, 0.20], before: 2, lh: 1.35},
+  res:    {f: "F2", size: 10,   rgb: [0.10, 0.29, 0.42], before: 2, lh: 1.35},
+  big:    {f: "F2", size: 10.5, rgb: [0.10, 0.29, 0.42], before: 4, lh: 1.35},
+  note:   {f: "F1", size: 8.5,  rgb: [0.42, 0.48, 0.53], before: 2, lh: 1.3},
+  theader:{f: "F2", size: 9.5,  rgb: [0.42, 0.48, 0.53], before: 2, lh: 1.35},
+  gap:    {f: "F1", size: 4,    rgb: [0, 0, 0], before: 0, lh: 1}
+};
+function pdfCleanX(s){
+  s = String(s);
+  s = s.replace(/10\u207b([\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079])/g, function(m, d){ return "10^-" + String("\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079".indexOf(d)); });
+  for (var i = 0; i < PDF_SYM.length; i++) s = s.replace(PDF_SYM[i][0], PDF_SYM[i][1]);
+  return s.replace(/[^\x20-\x7E]/g, "?").replace(/~DIA~/g, "\xd8");
+}
+function eqBoxes(node){
+  function cleanBoxes(boxes){
+    var out2 = [];
+    for (var i = 0; i < boxes.length; i++) {
+      var b = boxes[i];
+      if (b.k === "t" && b.s === "") continue;
+      if (b.k === "t" && out2.length && out2[out2.length - 1].k === "t") out2[out2.length - 1].s += b.s;
+      else out2.push(b);
+      if (b.k === "r" && out2.length >= 2 && out2[out2.length - 2].k === "t") {
+        var prev = out2[out2.length - 2];
+        if (/\s*sqrt\s*$/.test(prev.s)) {
+          prev.s = prev.s.replace(/\s*sqrt\s*$/, " ");
+          if (prev.s === "") out2.splice(out2.length - 2, 1);
+        }
+      }
+    }
+    return out2;
+  }
+  function walkKids(n, out){ for (var i = 0; i < n.childNodes.length; i++) walk(n.childNodes[i], out); }
+  function walk(n, out){
+    if (n.nodeType === 3) {
+      if (!n.nodeValue) return;
+      var parts = pdfCleanX(n.nodeValue).split(/\^(-?\d+(?:\.\d+)?)/);
+      for (var pi = 0; pi < parts.length; pi++) {
+        if (parts[pi] === "") continue;
+        if (pi % 2 === 1) out.push({k: "p", b: [{k: "t", s: parts[pi]}]});
+        else out.push({k: "t", s: parts[pi]});
+      }
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    var cl = " " + (n.className || "") + " ", tag = n.tagName.toLowerCase();
+    if (cl.indexOf(" frac ") >= 0) {
+      var num = [], den = [];
+      walk(n.querySelector(".num"), num);
+      walk(n.querySelector(".den"), den);
+      out.push({k: "f", num: cleanBoxes(num), den: cleanBoxes(den)});
+      return;
+    }
+    if (cl.indexOf(" rad ") >= 0) { var rb = []; walkKids(n, rb); out.push({k: "r", b: cleanBoxes(rb)}); return; }
+    if (tag === "sub") { var sb = []; walkKids(n, sb); out.push({k: "u", b: cleanBoxes(sb)}); return; }
+    if (tag === "sup") { var pb = []; walkKids(n, pb); out.push({k: "p", b: cleanBoxes(pb)}); return; }
+    if (tag === "br") return;
+    walkKids(n, out);
+  }
+  var boxes = [];
+  walkKids(node, boxes);
+  return cleanBoxes(boxes);
+}
+function pdfEsc(s){ return s.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/[\x80-\xff]/g, function(c){ return "\\" + ("000" + c.charCodeAt(0).toString(8)).slice(-3); }); }
+function pdfJpeg(img){
+  try {
+    if (!img.complete || !img.naturalWidth) return null;
+    var cv = img.ownerDocument.createElement("canvas"); cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+    var cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0);
+    return {w: cv.width, h: cv.height, bin: atob(cv.toDataURL("image/jpeg", 0.88).split(",")[1])};
+  } catch (e) { return null; }
+}
+function buildPdf(lines, balance){
+  var sourceLines=lines;lines=lines.slice();
+  var PW = 595.28, PH = 841.89, ML = 42, MT = 46, MB = 46;
+  var canvas = (g2("modPage").ownerDocument || window.document).createElement("canvas");
+  var ctx = canvas.getContext("2d");
+  function widthOf(t, st){ ctx.font = (st.f === "F2" ? "bold " : "") + st.size + "px Helvetica, Arial, sans-serif"; return ctx.measureText(t).width * 1.04; }
+  var pages = [], ops = null, y = 0;
+  var pdfImgs = [];
+  function newPage(){ ops = []; pages.push(ops); MB = balance && pages.length === balance.target ? balance.bottom : 46; y = PH - MT; }
+  newPage();
+  function measureBoxes(boxes, fs, f){
+    var w = 0, up = 0, dn = 0;
+    for (var i = 0; i < boxes.length; i++) {
+      var b = boxes[i], bw = 0, bu = 0, bd = 0;
+      if (b.k === "t") { bw = widthOf(b.s, {f: f, size: fs}); bu = fs * 0.8; bd = fs * 0.25; }
+      else if (b.k === "u") { var mu = measureBoxes(b.b, fs * 0.72, f); bw = mu.w + 0.8; bu = fs * 0.35; bd = fs * 0.5; }
+      else if (b.k === "p") { var mp = measureBoxes(b.b, fs * 0.72, f); bw = mp.w + 0.8; bu = fs * 0.72 + mp.up; bd = 0; }
+      else if (b.k === "f") {
+        var mn = measureBoxes(b.num, fs * 0.9, f), md = measureBoxes(b.den, fs * 0.9, f);
+        bw = Math.max(mn.w, md.w) + 8;
+        bu = mn.up + mn.dn + fs * 0.3 + 3.4;
+        bd = md.up + md.dn + 2.8;
+      }
+      else if (b.k === "r") { var mr = measureBoxes(b.b, fs, f); bw = mr.w + 16; bu = mr.up + 4; bd = mr.dn; }
+      w += bw;
+      if (bu > up) up = bu;
+      if (bd > dn) dn = bd;
+    }
+    return {w: w, up: up, dn: dn};
+  }
+  function drawBoxes(boxes, x, yBase, fs, f, rgb){
+    var cx = x;
+    for (var i = 0; i < boxes.length; i++) {
+      var b = boxes[i];
+      if (b.k === "t") {
+        ops.push("BT /" + f + " " + fs.toFixed(2) + " Tf " + rgb.join(" ") + " rg 1 0 0 1 " + cx.toFixed(2) + " " + yBase.toFixed(2) + " Tm (" + pdfEsc(b.s) + ") Tj ET");
+        cx += widthOf(b.s, {f: f, size: fs});
+      } else if (b.k === "u") {
+        var sfs = fs * 0.72;
+        drawBoxes(b.b, cx, yBase - fs * 0.25, sfs, f, rgb);
+        cx += measureBoxes(b.b, sfs, f).w + 0.8;
+      } else if (b.k === "p") {
+        var pfs = fs * 0.72;
+        drawBoxes(b.b, cx, yBase + fs * 0.38, pfs, f, rgb);
+        cx += measureBoxes(b.b, pfs, f).w + 0.8;
+      } else if (b.k === "f") {
+        var mn = measureBoxes(b.num, fs * 0.9, f), md = measureBoxes(b.den, fs * 0.9, f);
+        var bw2 = Math.max(mn.w, md.w) + 8;
+        var vy = yBase + fs * 0.25;
+        drawBoxes(b.num, cx + (bw2 - mn.w) / 2, vy + 3.4 + mn.dn, fs * 0.9, f, rgb);
+        drawBoxes(b.den, cx + (bw2 - md.w) / 2, vy - 2.8 - md.up, fs * 0.9, f, rgb);
+        var lw2 = Math.max(0.8, fs * 0.09);
+        ops.push("q " + rgb.join(" ") + " RG " + lw2.toFixed(2) + " w " + cx.toFixed(2) + " " + vy.toFixed(2) + " m " + (cx + bw2).toFixed(2) + " " + vy.toFixed(2) + " l S Q");
+        cx += bw2 + 3;
+      } else if (b.k === "r") {
+        var mr = measureBoxes(b.b, fs, f);
+        var lw3 = Math.max(0.9, fs * 0.1);
+        var top2 = yBase + mr.up + 4;
+        ops.push("q " + rgb.join(" ") + " RG " + lw3.toFixed(2) + " w "
+          + (cx + 0.8).toFixed(2) + " " + (yBase + fs * 0.05).toFixed(2) + " m "
+          + (cx + 4.2).toFixed(2) + " " + (yBase - fs * 0.32).toFixed(2) + " l "
+          + (cx + 7.2).toFixed(2) + " " + top2.toFixed(2) + " l "
+          + (cx + 13 + mr.w + 1).toFixed(2) + " " + top2.toFixed(2) + " l S Q");
+        drawBoxes(b.b, cx + 13, yBase, fs, f, rgb);
+        cx += 13 + mr.w + 3;
+      }
+    }
+  }
+  function figOps(fig, x0, yTop, sc){
+    for (var q = 0; q < fig.shapes.length; q++) {
+      var sh = fig.shapes[q], X, Y, W2, H2;
+      if (sh.t === "rect") {
+        X = x0 + sh.x * sc; Y = yTop - (sh.y + sh.h) * sc; W2 = sh.w * sc; H2 = sh.h * sc;
+        var cmd = "q ";
+        if (sh.dash) cmd += "[" + sh.dash + "] 0 d ";
+        if (sh.fill) cmd += sh.fill.join(" ") + " rg ";
+        if (sh.stroke) cmd += sh.stroke.join(" ") + " RG " + ((sh.sw || 1.5) * sc).toFixed(2) + " w ";
+        cmd += X.toFixed(2) + " " + Y.toFixed(2) + " " + W2.toFixed(2) + " " + H2.toFixed(2) + " re " + (sh.fill && sh.stroke ? "B" : (sh.fill ? "f" : "S")) + " Q";
+        ops.push(cmd);
+      } else if (sh.t === "circle") {
+        var cx = x0 + sh.x * sc, cy = yTop - sh.y * sc, r = sh.r * sc, k = 0.5523 * r;
+        var cp = "q " + (sh.fill ? sh.fill.join(" ") + " rg " : "") + (sh.stroke ? sh.stroke.join(" ") + " RG " + ((sh.sw || 1) * sc).toFixed(2) + " w " : "");
+        cp += (cx + r).toFixed(2) + " " + cy.toFixed(2) + " m ";
+        cp += (cx + r).toFixed(2) + " " + (cy + k).toFixed(2) + " " + (cx + k).toFixed(2) + " " + (cy + r).toFixed(2) + " " + cx.toFixed(2) + " " + (cy + r).toFixed(2) + " c ";
+        cp += (cx - k).toFixed(2) + " " + (cy + r).toFixed(2) + " " + (cx - r).toFixed(2) + " " + (cy + k).toFixed(2) + " " + (cx - r).toFixed(2) + " " + cy.toFixed(2) + " c ";
+        cp += (cx - r).toFixed(2) + " " + (cy - k).toFixed(2) + " " + (cx - k).toFixed(2) + " " + (cy - r).toFixed(2) + " " + cx.toFixed(2) + " " + (cy - r).toFixed(2) + " c ";
+        cp += (cx + k).toFixed(2) + " " + (cy - r).toFixed(2) + " " + (cx + r).toFixed(2) + " " + (cy - k).toFixed(2) + " " + (cx + r).toFixed(2) + " " + cy.toFixed(2) + " c ";
+        cp += (sh.fill && sh.stroke ? "B" : (sh.fill ? "f" : "S")) + " Q";
+        ops.push(cp);
+      } else if (sh.t === "line") {
+        var lc = "q ";
+        if (sh.dash) lc += "[" + sh.dash + "] 0 d ";
+        lc += (sh.stroke || FIG_C.mut).join(" ") + " RG " + ((sh.sw || 1) * sc).toFixed(2) + " w ";
+        lc += (x0 + sh.x1 * sc).toFixed(2) + " " + (yTop - sh.y1 * sc).toFixed(2) + " m " + (x0 + sh.x2 * sc).toFixed(2) + " " + (yTop - sh.y2 * sc).toFixed(2) + " l S Q";
+        ops.push(lc);
+      } else if (sh.t === "text") {
+        var fs = (sh.size || 11) * sc * 0.92;
+        var tw = widthOf(pdfClean(sh.s), {f: sh.bold ? "F2" : "F1", size: fs});
+        var tx = x0 + sh.x * sc;
+        if (sh.anchor === "middle" || !sh.anchor) tx -= tw / 2;
+        else if (sh.anchor === "end") tx -= tw;
+        ops.push("BT /" + (sh.bold ? "F2" : "F1") + " " + fs.toFixed(2) + " Tf " + (sh.fill || FIG_C.txt).join(" ") + " rg 1 0 0 1 " + tx.toFixed(2) + " " + (yTop - sh.y * sc).toFixed(2) + " Tm (" + pdfEsc(pdfClean(sh.s)) + ") Tj ET");
+      }
+    }
+  }
+  var fullW=PW-2*ML,gutter=22,colW=(fullW-gutter)/2;
+  var left=ML,available=fullW,col=-1,colTop=y,rightTop=y;
+  function advance(){
+    if(col===0){col=1;left=ML+colW+gutter;y=rightTop;}
+    else{newPage();col=col<0?-1:0;left=ML;colTop=y;rightTop=y;}
+  }
+  function ensure(h){if(y-h<MB)advance();}
+  function wrapText(t,st,w){var out=[],cur="";String(t).split(/\s+/).forEach(function(word){var trial=cur?cur+" "+word:word;if(cur&&widthOf(trial,st)>w){out.push(cur);cur=word;}else cur=trial;});if(cur)out.push(cur);return out.length?out:[""];}
+  function renderLine(line){
+    var st=PDF_STYLES[line.s]||PDF_STYLES.eq;
+    if(line.s==="fig"){var fg=RC_FIGS[line.fig];if(!fg)return;var fsc=Math.min(available/fg.w,1.4),fh=fg.h*fsc;ensure(fh+8);figOps(fg,left+(available-fg.w*fsc)/2,y-4,fsc);y-=fh+8;return;}
+    if(line.s==="gap"){y-=6;return;}
+    if(line.s==="img"){var jd=pdfJpeg(line.el);if(!jd)return;var iw=Math.min(available,(parseFloat(line.el.getAttribute("data-dw"))||jd.w)*0.75),ih=iw*jd.h/jd.w;if(ih>420){ih=420;iw=ih*jd.w/jd.h;}ensure(ih+8);y-=ih+4;var nm="Im"+pdfImgs.length;pdfImgs.push(jd);ops.push("q "+iw.toFixed(2)+" 0 0 "+ih.toFixed(2)+" "+left.toFixed(2)+" "+y.toFixed(2)+" cm /"+nm+" Do Q");y-=4;return;}
+    if(line.s==="eqx"){
+      st=PDF_STYLES[line.base]||PDF_STYLES.eq;
+      var boxes=eqBoxes(line.node),tokens=[];
+      boxes.forEach(function(b){if(b.k==="t"){b.s.split(/(\s+)/).forEach(function(t){if(t)tokens.push({k:"t",s:t});});}else tokens.push(b);});
+      var rows=[],row=[];
+      tokens.forEach(function(t){var trial=row.concat([t]);if(row.length&&measureBoxes(trial,st.size,st.f).w>available){rows.push(row);row=[];}if(row.length||t.k!=="t"||t.s.trim())row.push(t);});
+      if(row.length)rows.push(row);
+      var measured=rows.map(function(r){var size=st.size,mm=measureBoxes(r,size,st.f);if(mm.w>available){size*=available/mm.w;mm=measureBoxes(r,size,st.f);}return {r:r,m:mm,size:size};});
+      var total=st.before;measured.forEach(function(v){total+=v.m.up+v.m.dn+5;});ensure(total);y-=st.before;
+      measured.forEach(function(v){ensure(v.m.up+v.m.dn+5);y-=v.m.up+2;drawBoxes(v.r,left,y,v.size,st.f,st.rgb);y-=v.m.dn+3;});return;
+    }
+    var wrapped=wrapText(line.t||"",st,available),lh=st.size*st.lh;
+    var heading=["h2","step","gh"].indexOf(line.s)>=0;
+    ensure(st.before+lh*wrapped.length+(heading?30:0));y-=st.before;
+    wrapped.forEach(function(t){ensure(lh);y-=lh;ops.push("BT /"+st.f+" "+st.size+" Tf "+st.rgb.join(" ")+" rg 1 0 0 1 "+left.toFixed(2)+" "+y.toFixed(2)+" Tm ("+pdfEsc(t)+") Tj ET");});
+  }
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i];
+    if(line.s==="intro"){
+      var introTop=y-8;available=colW;left=ML;y=introTop;
+      line.inputs.forEach(renderLine);var inputBottom=y;
+      if(line.fig&&RC_FIGS[line.fig]){var fg=RC_FIGS[line.fig],fsc=Math.min(colW/fg.w,280/fg.h);figOps(fg,ML+colW+gutter+(colW-fg.w*fsc)/2,introTop-12,fsc);y=Math.min(inputBottom,introTop-12-fg.h*fsc);}
+      var figureBottom=y;
+      left=ML+colW+gutter;y=introTop-12-(line.fig&&RC_FIGS[line.fig]?RC_FIGS[line.fig].h*Math.min(colW/RC_FIGS[line.fig].w,280/RC_FIGS[line.fig].h):0)-10;
+      renderLine({t:"Results",s:"h2"});
+      for(var si=0;si<line.summary.length;si++){
+        var sln=line.summary[si],sst=PDF_STYLES[sln.s]||PDF_STYLES.eq;
+        var sh=sst.before+wrapText(sln.t||"",sst,available).length*sst.size*sst.lh+3;
+        if(y-sh<MB+8){lines.splice.apply(lines,[i+2,0].concat(line.summary.slice(si)));break;}
+        renderLine(sln);
+      }
+      rightTop=y-14;y=inputBottom-14;left=ML;available=fullW;continue;
+    }
+    if(line.s==="columns"){col=0;available=colW;left=ML;colTop=y;continue;}
+    renderLine(line);
+  }
+  // Page furniture stays outside the calculation area.
+  pages.forEach(function(page,index){page.push("q 0.84 0.88 0.91 RG 0.5 w 42 34 m 553 34 l S Q");page.push("BT /F1 8 Tf 0.42 0.48 0.53 rg 1 0 0 1 42 22 Tm (Staircase Design) Tj ET");page.push("BT /F1 8 Tf 0.42 0.48 0.53 rg 1 0 0 1 480 22 Tm (Page "+(index+1)+" / "+pages.length+") Tj ET");});
+  var nPages = pages.length, pageObjStart = 5, objs = [], kids = [];
+  objs[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  for (var p = 0; p < nPages; p++) kids.push((pageObjStart + p * 2) + " 0 R");
+  objs[2] = "<< /Type /Pages /Kids [" + kids.join(" ") + "] /Count " + nPages + " >>";
+  objs[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+  objs[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+  var imgBase = pageObjStart + nPages * 2, imgRes = "";
+  if (pdfImgs.length) { imgRes = " /XObject <<"; for (var q2 = 0; q2 < pdfImgs.length; q2++) { imgRes += " /Im" + q2 + " " + (imgBase + q2) + " 0 R"; objs[imgBase + q2] = "<< /Type /XObject /Subtype /Image /Width " + pdfImgs[q2].w + " /Height " + pdfImgs[q2].h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + pdfImgs[q2].bin.length + " >>\nstream\n" + pdfImgs[q2].bin + "\nendstream"; } imgRes += " >>"; }
+  for (var p2 = 0; p2 < nPages; p2++) {
+    var contentId = pageObjStart + p2 * 2 + 1;
+    var stream = pages[p2].join("\n");
+    objs[pageObjStart + p2 * 2] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + PW + " " + PH + "] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>" + imgRes + " >> /Contents " + contentId + " 0 R >>";
+    objs[contentId] = "<< /Length " + stream.length + " >>\nstream\n" + stream + "\nendstream";
+  }
+  var pdf = "%PDF-1.4\n", offsets = [0];
+  for (var o = 1; o < objs.length; o++) {
+    offsets[o] = pdf.length;
+    pdf += o + " 0 obj\n" + objs[o] + "\nendobj\n";
+  }
+  var xrefPos = pdf.length;
+  pdf += "xref\n0 " + objs.length + "\n0000000000 65535 f \n";
+  for (var x = 1; x < objs.length; x++) pdf += ("0000000000" + offsets[x]).slice(-10) + " 00000 n \n";
+  pdf += "trailer\n<< /Size " + objs.length + " /Root 1 0 R >>\nstartxref\n" + xrefPos + "\n%%EOF";
+  var bytes = new Uint8Array(pdf.length);
+  for (var b = 0; b < pdf.length; b++) bytes[b] = pdf.charCodeAt(b) & 0xff;
+  var output=new Blob([bytes], {type: "application/pdf"});output._pages=pages.length;
+  if(!balance && pages.length>1 && col===0){
+    var low=46,high=PH-MT-65,best=output;
+    for(var bt=0;bt<9;bt++){
+      var mid=(low+high)/2,candidate=buildPdf(sourceLines,{target:pages.length,bottom:mid});
+      if(candidate._pages===pages.length){best=candidate;low=mid;}else high=mid;
+    }
+    return best;
+  }
+  return output;
+}
+function printGeneratedPdf(){
+  if (window.isNativeApp && window.isNativeApp()) { window.nativePdf(buildPdf(sheetLines()), pdfFileName()); return; }
+  var blob=buildPdf(sheetLines()),url=URL.createObjectURL(blob),w=window.open(url,"_blank");
+  if(w){w.addEventListener("load",function(){try{w.print();}catch(e){}},{once:true});}
+  else downloadPdf();
+  setTimeout(function(){URL.revokeObjectURL(url);},300000);
+}
+function pdfFileName(){
+  return currentMod.title.replace(/[^A-Za-z0-9]+/g, " ").trim() + ".pdf";
+}
+function inFrame(){
+  try { return window.self !== window.top; } catch (e) { return true; }
+}
+function sheetNote(msg){
+  var pv = g2("printView");
+  if (!pv) return;
+  var old = pv.querySelector(".pv-note");
+  if (old) old.remove();
+  var n = pv.ownerDocument.createElement("div");
+  n.className = "pv-note";
+  n.textContent = msg;
+  pv.querySelector(".pv-bar").appendChild(n);
+}
+function downloadPdf(){
+  if (window.isNativeApp && window.isNativeApp()) { window.nativePdf(buildPdf(sheetLines()), pdfFileName()); return; }
+  try {
+    var blob = buildPdf(sheetLines());
+    if (inFrame()) {
+      sheetNote("This hosted page blocks file downloads. Open the standalone RC Design app to save or share the PDF.");
+      return;
+    }
+    if (window.XLSX && window.XLSX.save && /iPad|iPhone|iPod/.test(navigator.userAgent || "")) { window.XLSX.save(blob, pdfFileName()); return; }
+    var url = URL.createObjectURL(blob);
+    var doc = g2("modPage").ownerDocument || window.document;
+    var a = doc.createElement("a");
+    a.href = url;
+    a.download = pdfFileName();
+    doc.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (e) { window.print(); }
+}
+function sharePdf(){
+  if (window.isNativeApp && window.isNativeApp()) { window.nativePdf(buildPdf(sheetLines()), pdfFileName()); return; }
+  try {
+    var blob = buildPdf(sheetLines());
+    var file = new File([blob], pdfFileName(), {type: "application/pdf"});
+    if (navigator.canShare && navigator.canShare({files: [file]})) {
+      navigator.share({files: [file], title: currentMod.title}).catch(function(){});
+    } else downloadPdf();
+  } catch (e) { downloadPdf(); }
+}
+var currentMod = null;
+var histPushed = false;
+var lastHomeScroll = null;
+var lastHomeTile = null;
+window.addEventListener("popstate", function(){
+  var mp = g2("modPage");
+  if (mp && mp.style.display !== "none") goHome();
+});
+function openModule(id){
+  currentMod = MODULES.filter(function(m){ return m.id === id; })[0];
+  if (!currentMod) return;
+  var m = currentMod;
+  g2("modPage").innerHTML = "<div class='card'><h2>" + m.title + "</h2><div class='sub' style='color:var(--muted);font-size:12px;margin:-8px 0 8px'>" + m.sub + "</div>"
+    + "<div id='figTop' class='figtop' style='display:none'></div>"
+    + fieldRows(m.fields, 2)
+    + "<button class='go' type='button' data-action='run'>Calculate</button>"
+    + "<button class='go print' type='button' data-action='print' id='printBtn' style='display:none'>Print / PDF calculation sheet</button>"
+    + "<button class='go' type='button' data-action='dlxlsx' style='background:#1e7d4f;margin-top:10px'>Export Excel</button></div>"
+    + "<div class='card result' id='res' style='display:none'></div>";
+  try { lastHomeScroll = (window.self === window.top) ? (window.scrollY || window.pageYOffset || 0) : null; } catch (e) { lastHomeScroll = null; }
+  lastHomeTile = id;
+  g2("homePage").style.display = "none";
+  g2("modPage").style.display = "block";
+  g2("backBtn").style.display = "inline";
+  // scrollIntoView reaches ancestor frames too, so the host page scrolls to the
+  // opened module; window.scrollTo cannot (the frame is as tall as its content).
+  g2("modPage").scrollIntoView({block: "start"});
+  try { history.pushState({ rcMod: id }, ""); histPushed = true; } catch (e) { histPushed = false; }
+  var mp2 = g2("modPage");
+  if (!mp2.dataset.figHook) {
+    mp2.dataset.figHook = "1";
+    mp2.addEventListener("input", function(){ clearTimeout(figTopTimer); figTopTimer = setTimeout(updateFigTop, 200); });
+    mp2.addEventListener("change", function(){ clearTimeout(figTopTimer); figTopTimer = setTimeout(updateFigTop, 60); });
+  }
+  updateFigTop();
+}
+var figTopTimer = null;
+function updateFigTop(){
+  var ft = g2("figTop");
+  if (!ft || !currentMod) return;
+  var html;
+  try { html = currentMod.run(); } catch (e) { return; }
+  var tmp = ft.ownerDocument.createElement("div");
+  tmp.innerHTML = html;
+  var fig = tmp.querySelector(".fig");
+  if (!fig) { ft.style.display = "none"; return; }
+  var cap = fig.querySelector(".figcap");
+  if (cap) cap.remove();
+  ft.innerHTML = "";
+  ft.appendChild(fig);
+  ft.style.display = "block";
+}
+function runMod(){
+  var res = g2("res");
+  try {
+    res.innerHTML = currentMod.run();
+    if (res.innerHTML.indexOf("step-head") >= 0 && window.sheetFigsFor) res.innerHTML += window.sheetFigsFor(currentMod);
+    res.style.display = "block";
+    var pb = g2("printBtn");
+    if (pb) pb.style.display = res.innerHTML.indexOf("step-head") >= 0 ? "block" : "none";
+    res.scrollIntoView({behavior: "smooth"});
+  } catch (e) {
+    res.innerHTML = "<span class='bad'>Calculation error: " + e.message + "</span>";
+    res.style.display = "block";
+  }
+}
+function goHome(){
+  histPushed = false;
+  g2("modPage").style.display = "none";
+  g2("homePage").style.display = "block";
+  g2("backBtn").style.display = "none";
+  var restored = false;
+  if (lastHomeScroll !== null) {
+    try { window.scrollTo(0, lastHomeScroll); restored = true; } catch (e) {}
+  }
+  if (!restored && lastHomeTile) {
+    var tile = g2("homePage").querySelector("[data-mod='" + lastHomeTile + "']");
+    if (tile) { tile.scrollIntoView({block: "center"}); restored = true; }
+  }
+  if (!restored) g2("homePage").scrollIntoView({block: "start"});
+}
+renderHome();
+try {
+  var pageCss = window.document.createElement("style");
+  pageCss.textContent = "@page { size: A4; margin: 14mm; }";
+  window.document.head.appendChild(pageCss);
+} catch (e) {}
+
+// Explicit tap/click handling. Inline onclick attributes are unreliable here:
+// some mobile Chrome builds drop the tap-generated compatibility click for
+// shadow-DOM content, so taps never reached openModule. Delegated listeners on
+// the shadow root see the real (unretargeted) target and touchend fires on
+// every tap, so modules open on both mouse and touch.
+// injected into the app framework (inside mountRcApp): "Export Excel" for the open tool
+function exportExcel(){
+  var m = currentMod, v = {}, note = function(t){ var r = g2("res"); if (r) { var d = r.ownerDocument.createElement("div"); d.className = "warn"; d.textContent = t; r.insertBefore(d, r.firstChild); r.style.display = "block"; } };
+  m.fields.forEach(function(f){ var s = g("f_" + f.k); v[f.k] = (s !== "" && isFinite(Number(s))) ? Number(s) : s; });
+  var base = m.title.replace(/[^A-Za-z0-9]+/g, " ").trim();
+  try {
+    if (m.xlsx) { XLSX.save(m.xlsx(v), base + ".xlsx"); return; }
+    if (m.tpl) {   // the tool's own Excel sheet: fill its input cells
+      var ed = m.tpl.cells(v), list = Object.keys(ed).map(function(ref){ return {ref: ref, v: ed[ref]}; });
+      fetch(m.tpl.file).then(function(x){ if (!x.ok) throw new Error("template not found"); return x.arrayBuffer(); })
+        .then(function(buf){ XLSX.save(XLSX.patchTemplate(buf, m.tpl.path, list, m.tpl.tab), base + ".xlsx"); })
+        .catch(function(e){ note("Excel export failed: " + e.message); });
+      return;
+    }
+    var K = window.KATEB_XLSX;
+    if (K && K.modules[m.id]) {
+      var r = K.modules[m.id](v), sh = K.sheets[r.sheet];
+      var edits = Object.keys(r.set).map(function(ref){ return {ref: ref, v: r.set[ref]}; });
+      fetch(K.file).then(function(x){ if (!x.ok) throw new Error("template not found"); return x.arrayBuffer(); })
+        .then(function(buf){ XLSX.save(XLSX.patchTemplate(buf, sh.path, edits, sh.tab), "El-Kateb - " + r.sheet.replace(/[^A-Za-z0-9 -]+/g, " ").trim() + ".xlsx"); })
+        .catch(function(e){ note("Excel export failed: " + e.message); });
+      return;
+    }
+    // tools without an Excel sheet: inputs + results as a workbook
+    var rows = [[{v: m.title, s: 1}], [{v: "Values exported from the app (this tool has no Excel sheet). " + new Date().toLocaleString("en-GB"), s: 5}], [], [{v: "INPUTS", s: 2}, {v: "", s: 2}, {v: "", s: 2}]];
+    m.fields.forEach(function(f){ rows.push([f.label, {v: v[f.k], s: 3}, f.unit || ""]); });
+    rows.push([], [{v: "RESULTS", s: 2}, {v: "", s: 2}, {v: "", s: 2}]);
+    if (!g2("res") || g2("res").style.display === "none") runMod();
+    var lines = []; htmlToLines(g2("res"), lines);
+    lines.forEach(function(l){ if (l.t) rows.push([{v: l.t, s: l.s === "h2" ? 8 : (l.s === "res" ? 8 : 0)}]); });
+    XLSX.save(XLSX.build([{name: "Calculation", cols: [70, 16, 10], rows: rows}]), base + ".xlsx");
+  } catch (e) { note("Excel export failed: " + e.message); }
+}
+function handleAction(target){
+  var el = target && target.closest ? target.closest("[data-mod],[data-action],[data-view],#backBtn") : null;
+  if (!el) return false;
+  if (el.id === "backBtn") { if (histPushed) { history.back(); } else { goHome(); } return true; }
+  if (el.getAttribute("data-action") === "run") { runMod(); return true; }
+  if (el.getAttribute("data-action") === "print") { printSheet(); return true; }
+  if (el.getAttribute("data-action") === "doprint") { printGeneratedPdf(); return true; }
+  if (el.getAttribute("data-action") === "dlpdf") { downloadPdf(); return true; }
+  if (el.getAttribute("data-action") === "dlxlsx") { exportExcel(); return true; }
+  if (el.getAttribute("data-action") === "sharepdf") { sharePdf(); return true; }
+  if (el.getAttribute("data-action") === "pdm") { setPdm(el.getAttribute("data-pdmv")); return true; }
+  if (el.getAttribute("data-action") === "printback") { var pv = g2("printView"); if (pv) pv.remove(); g2("modPage").classList.remove("printing"); return true; }
+  var vw = el.getAttribute("data-view");
+  if (vw) { setView(vw); return true; }
+  var mod = el.getAttribute("data-mod");
+  if (mod) { openModule(mod); return true; }
+  return false;
+}
+var lastTouchHandled = 0;
+root.addEventListener("touchend", function(e){
+  if (handleAction(e.target)) { lastTouchHandled = Date.now(); e.preventDefault(); }
+}, {passive: false});
+root.addEventListener("click", function(e){
+  if (Date.now() - lastTouchHandled < 700) return;
+  handleAction(e.target);
+});
+
+  window.runMod = runMod;
+  window.goHome = goHome;
+  window.openModule = openModule;
+  window.setPdm = setPdm;
+  window.printSheet = printSheet;
+  window.__rcPdf = { buildPdf: buildPdf, sheetLines: sheetLines, pileMomentGrid: pileMomentGrid };
+}
+</script>
+<script>
+(function(){
+  var host = document.getElementById('host');
+  var root = host.attachShadow({mode:'open'});
+  var st = document.createElement('style');
+  st.textContent = appCss;
+  root.appendChild(st);
+  var wrap = document.createElement('div');
+  wrap.innerHTML = appBody;
+  root.appendChild(wrap);
+  mountRcApp(root);
+  if ('serviceWorker' in navigator) {
+    var rcHadController = !!navigator.serviceWorker.controller;
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('../sw.js', {updateViaCache: 'none'}).then(function(reg){ reg.update().catch(function(){}); }).catch(function(){});
+      var rcReloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function(){
+        if (rcReloaded || !rcHadController) return;
+        rcReloaded = true;
+        location.reload();
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
